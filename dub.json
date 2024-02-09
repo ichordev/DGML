@@ -1,0 +1,16 @@
+{
+	"name": "dgml",
+	"description": "A library to help with porting GameMaker games to D.",
+	"authors": ["Aya Partridge"],
+	"license": "BSL-1.0",
+	
+	"dependencies": {
+		"bindbc-bgfx": "~>1.2.0",
+		"bindbc-sdl": "~>1.4.5",
+	},
+	
+	"targetType": "staticLibrary",
+	"targetPath": "lib",
+	"targetName": "DGML",
+	
+}
