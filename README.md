@@ -1,12 +1,15 @@
-# Dumb Game Making Library
+# Dependent Game Making Library
 
-DGML is here to help (former) GameMaker users wishing to port their games into D.
+De-GML is here to help (former) GameMaker users wishing to port their games into D.
 
 The library mainly focuses on 2D GameMaker games without custom rendering setups. If you've done custom/3D rendering in GameMaker, you're probably up to doing the rendering yourself by using [bgfx](https://github.com/bkaradzic/bgfx/)'s [D bindings](https://github.com/BindBC/bindbc-bgfx).
 
-DGML's API uses GameMaker function names
+DeGML's API uses GameMaker function names converted to D-style camelCase, but has aliases for the exact function names.
+Any enumerated constants (e.g. `pt_linestrip`) will be converted to D enums with the appropriate casing (e.g. `PT.lineStrip) with GML-like aliases (e.g. `pt.linestrip`)
 
-GML features that can easily be converted to using D features or Phobos functions are not necessarily included in DGML. Some simple conversions are listed in the [Conversion Cheatsheet](#conversion-cheatsheet).
+Documentation is sparse because this library is for converting existing code. Up-to-date documentation for GameMaker is located [here](https://manual.gamemaker.io).
+
+GML features that can easily be converted to using D features or Phobos functions are not necessarily included in DeGML. Some simple conversions are listed in the [Conversion Cheatsheet](#conversion-cheatsheet) below.
 
 ## Conversion Cheatsheet
 
