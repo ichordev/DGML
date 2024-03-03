@@ -1,7 +1,7 @@
 module gml.maths;
 
 import std.datetime, std.format, std.math, std.random;
-import ic.calc;
+import ic.calc, ic.ease;
 
 alias pi = ic.calc.pi;
 
@@ -367,7 +367,7 @@ void randomise() nothrow @nogc @safe{
 	rng.seed(unpredictableSeed);
 }
 
-alias lerp = ic.calc.lerp;
+alias lerp = ic.ease.lerp;
 
 //Angles And Distance 
 

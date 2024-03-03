@@ -2,7 +2,7 @@
 	"name": "de-gml",
 	"description": "A library to help with porting GameMaker games to D.",
 	"authors": ["Aya Partridge"],
-	"license": "BSL-1.0",
+	"license": "LGPL-3.0-or-later",
 	
 	"dependencies": {
 		"bindbc-bgfx": "~>1.2.0",
