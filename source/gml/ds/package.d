@@ -5,7 +5,7 @@ public import
 
 import std.sumtype;
 
-alias DSItem = SumType!(
+alias DSVal = SumType!(
 	typeof(null),
 	string,
 	double,
@@ -27,14 +27,14 @@ enum Type{
 	dsMap,
 }
 
-struct DSItem{
+struct DSVal{
 	private union{
 		string _str;
 		double _number;
 		int _int32;
 		long _int64;
 		bool _bool;
-		DSItem[] array;
+		DSVal[] array;
 		void* _ptr;
 		DSList* _dsList;
 		DSMap* _dsMap;
