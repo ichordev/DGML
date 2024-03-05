@@ -1,10 +1,10 @@
 module gml.ds.list;
 
-import gml.ds;
+import gml.ds, gml.maths;
 
 import core.exception;
-import std.typecons;
-import ic.mem;
+import std.algorithm.sorting, std.conv, std.math, std.random, std.sumtype, std.typecons, std.uni;
+import ic.calc, ic.mem;
 
 struct DSList{
 	private DSVal[] _data = null;
@@ -59,20 +59,6 @@ struct DSList{
 	mixin(opApplyTempl!q{nothrow @nogc pure});
 	mixin(opApplyTempl!q{nothrow pure @safe});
 	mixin(opApplyTempl!q{nothrow @nogc pure @safe});
-	/*
-	size_t frontInd = 0;
-	size_t backInd  = 0;
-	
-	@property empty() nothrow @nogc pure @safe => frontInd >= (_length ? _length-1 : _length) || backInd >= (_length ? _length-1 : _length);
-	@property front() nothrow @nogc pure @safe => tuple!(size_t, DSVal)(frontInd, _data[frontInd]);
-	@property back() nothrow @nogc pure @safe  => tuple!(size_t, DSVal)(backInd,  _data[backInd]);
-	void popFront() nothrow @nogc pure @safe{
-		frontInd++;
-	}
-	void popBack() nothrow @nogc pure @safe{
-		backInd++;
-	}
-	*/
 	
 	DSVal opIndex(size_t i) nothrow @nogc pure @safe =>
 		i < _length ? _data[i] : DSVal(null);
@@ -109,6 +95,9 @@ struct DSList{
 			_length = 0;
 		}
 	}
+	
+	string toString() pure @safe =>
+		text(_data[0.._length]);
 	
 	~this() nothrow @nogc @safe{
 		freeData();
@@ -169,22 +158,25 @@ unittest{
 	assert(list._data[0..list._length] == [DSVal(10), DSVal(20), DSVal(30), DSVal(50)]);
 }
 
-ptrdiff_t dsListFindIndex(T)(DSList* id, T val) nothrow @nogc pure @safe{
+ptrdiff_t dsListFindIndex(T)(DSList* id, T val) nothrow @nogc @safe{
 	const dsVal = DSVal(val);
-	size_t ind;
-	foreach(item; *id){
-		if(dsVal == item){
+	foreach(ind, item; *id){
+		if(match!(
+			(long a, long b) => a == b,
+			(double a, double b) => a.eqEps(b, dsPrecision),
+			(string a, string b) => a == b,
+			(a, b) => false,
+		)(item, dsVal)){
 			return ind;
 		}
-		ind++;
 	}
 	return -1;
 }
 alias ds_list_find_index = dsListFindIndex;
 unittest{
 	auto list = dsListCreate();
-	dsListAdd(list, "a", "b", "c", "d", "e", "f");
-	assert(dsListFindIndex(list, "d") == 3);
+	dsListAdd(list, 1, 5, 7.5, "a", "b", "c", "d", "e", "f");
+	assert(dsListFindIndex(list, "d") == 6);
 }
 
 DSVal dsListFindValue(DSList* id, size_t pos) nothrow @nogc pure @safe =>
@@ -228,3 +220,47 @@ unittest{
 	dsListReplace(list, 4, 1.92);
 	assert(list._data[0..list._length] == [DSVal(0.0), DSVal(0.4), DSVal(0.8), DSVal(1.2), DSVal(1.92), DSVal(2.0)]);
 }
+
+void dsListShuffle(DSList* id) nothrow @nogc @safe{
+	randomShuffle(id._data[0..id._length], gml.maths.rng);
+}
+alias ds_list_shuffle = dsListShuffle;
+unittest{
+	auto list = dsListCreate();
+	dsListAdd(list, 0,1,2,3,4);
+	dsListShuffle(list);
+	assert(list._data[0..list._length][0] != DSVal(0));
+}
+
+void dsListSort(DSList* id, bool ascending) nothrow @nogc pure @safe{
+	if(ascending){
+		id._data[0..id._length].sort!((a, b) => match!(
+			(long a, long b) => a < b,
+			(double a, double b) => a.cmp(b) < 0,
+			(string a, string b) => a.sicmp(b) < 0,
+			(double a, string b) => true,
+			(string a, double b) => false,
+			(a, b) => false, //TODO: work out how `undefined` is sorted
+		)(a, b))();
+	}else{
+		id._data[0..id._length].sort!((a, b) => match!(
+			(long a, long b) => a > b,
+			(double a, double b) => a.cmp(b) > 0,
+			(string a, string b) => a.sicmp(b) > 0,
+			(double a, string b) => false,
+			(string a, double b) => true,
+			(a, b) => false,
+		)(a, b))();
+	}
+}
+alias ds_list_sort = dsListSort;
+unittest{
+	auto list = dsListCreate();
+	dsListAdd(list, "!5", "5 (number)", 4, 2.5, double.infinity, "cba", "abc");
+	dsListSort(list, true);
+	assert(list._data[0..list._length] == [DSVal(2.5), DSVal(4), DSVal(double.infinity), DSVal("!5"), DSVal("5 (number)"), DSVal("abc"), DSVal("cba")]);
+	dsListSort(list, false);
+	assert(list._data[0..list._length] == [DSVal("cba"), DSVal("abc"), DSVal("5 (number)"), DSVal("!5"), DSVal(double.infinity), DSVal(4), DSVal(2.5)]);
+}
+
+
