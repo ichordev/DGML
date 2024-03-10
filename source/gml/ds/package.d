@@ -4,17 +4,6 @@ public import
 	gml.ds.list,
 	gml.ds.map;
 
-import std.sumtype;
-
-alias DSVal = SumType!(
-	typeof(null),
-	string,
-	double,
-	long,
-	//DSMap,
-	DSList,
-);
-
 double dsPrecision = 0.00_00_00_1;
 
 void dsSetPrecision(double prec) nothrow @nogc @safe{
@@ -33,10 +22,14 @@ enum DSType{
 alias ds_type = DSType;
 
 bool dsExists(T)(T ind, DSType type) nothrow @nogc pure @safe{
-	static if(is(T: DSList)){
+	/*static if(is(T: DSGrid)){
+		return type == DSType.grid;
+	}else*/ static if(is(T: DSList)){
 		return type == DSType.list;
 	}else static if(is(T: DSMap)){
 		return type == DSType.map;
+	}else static if(is(T: DSPriority)){
+		return type == DSType.priority;
 	}else static assert(0, "Bad `ind` type: "~typeof(ind).stringof);
 }
 alias ds_exists = dsExists;

@@ -6,6 +6,15 @@ import core.exception, core.memory;
 import std.algorithm.sorting, std.conv, std.math, std.random, std.sumtype, std.typecons, std.uni;
 import ic.calc, ic.mem;
 
+alias DSVal = SumType!(
+	typeof(null),
+	string,
+	double,
+	long,
+	DSMap,
+	DSList,
+);
+
 struct DSList{
 	DSVal[] data;
 	alias data this;
@@ -221,7 +230,6 @@ bool dsListIsList(DSList id, size_t pos) nothrow @nogc pure @safe{
 }
 alias ds_list_is_list = dsListIsList;
 
-/*
 bool dsListIsMap(DSList id, size_t pos) nothrow @nogc pure @safe{
 	if(pos >= id.data.length) return false;
 	return id.data[pos].match!(
@@ -230,4 +238,3 @@ bool dsListIsMap(DSList id, size_t pos) nothrow @nogc pure @safe{
 	);
 }
 alias ds_list_is_map = dsListIsMap;
-*/
