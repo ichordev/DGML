@@ -49,6 +49,7 @@ void dsPriorityChangePriority(V)(ref DSPriority id, V val, double priority){
 			try{
 				if(item[0] == varVal){
 					item[1] = priority;
+					break;
 				}
 			}catch(Exception ex){
 			}
@@ -142,6 +143,7 @@ double dsPriorityFindPriority(V)(DSPriority id, V val){
 			try{
 				if(item[0] == varVal){
 					ret = item[1];
+					break;
 				}
 			}catch(Exception ex){
 			}
