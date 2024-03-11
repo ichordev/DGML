@@ -1,8 +1,10 @@
 module gml.ds;
 
 public import
+	gml.ds.grid,
 	gml.ds.list,
-	gml.ds.map;
+	gml.ds.map,
+	gml.ds.priority;
 
 double dsPrecision = 0.00_00_00_1;
 

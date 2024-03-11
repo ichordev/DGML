@@ -3,8 +3,7 @@ module gml.ds.list;
 import gml.ds, gml.maths;
 
 import core.exception, core.memory;
-import std.algorithm.sorting, std.conv, std.math, std.random, std.sumtype, std.typecons, std.variant, std.uni;
-import ic.calc, ic.mem;
+import std.algorithm.sorting, std.conv, std.math, std.random, std.typecons, std.variant, std.uni;
 
 struct DSList{
 	Variant[] data;
@@ -16,28 +15,31 @@ struct DSList{
 		[i, j];
 	
 	Variant opIndexAssign(T)(T val) nothrow @nogc pure @safe{
-		const dsVal = Variant(val);
-		data[] = dsVal;
-		return dsVal;
+		const varVal = Variant(val);
+		data[] = varVal;
+		return varVal;
 	}
 	Variant opIndexAssign(T)(T val, size_t i) @safe{
 		if(i >= data.length){
 			const start = data.length;
 			data.length = i+1;
 			() @trusted{
-				const nullVar = Variant(null);
-				data[start..$-1] = nullVar;
+				data[start..$-1] = Variant(null);
 			}();
 		}
 		return (() @trusted => data[i] = Variant(val))();
 	}
 	Variant opIndexAssign(T)(T val, size_t[2] r) nothrow @safe{
 		if(r[1] >= data.length){
-			length = r[1]+1;
+			const start = data.length;
+			data.length = r[1]+1;
+			() @trusted{
+				data[start..r[0]] = Variant(null);
+			}();
 		}
-		const dsVal = Variant(val);
-		data[r[0]..r[1]] = dsVal;
-		return dsVal;
+		const varVal = Variant(val);
+		data[r[0]..r[1]] = varVal;
+		return varVal;
 	}
 }
 

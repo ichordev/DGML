@@ -201,7 +201,7 @@ unittest{
 
 //TODO: ds_map_write
 
-void dsMapDestroy(ref DSMap id) nothrow pure{
+void dsMapDestroy(ref DSMap id) nothrow @nogc pure{
 	GC.free(cast(void*)id.data);
 	id.data = null;
 }
