@@ -4,7 +4,9 @@ public import
 	gml.ds.grid,
 	gml.ds.list,
 	gml.ds.map,
-	gml.ds.priority;
+	gml.ds.priority,
+	gml.ds.queue,
+	gml.ds.stack;
 
 double dsPrecision = 0.00_00_00_1;
 
@@ -24,14 +26,18 @@ enum DSType{
 alias ds_type = DSType;
 
 bool dsExists(T)(T ind, DSType type) nothrow @nogc pure @safe{
-	/*static if(is(T: DSGrid)){
+	static if(is(T: DSGrid)){
 		return type == DSType.grid;
-	}else*/ static if(is(T: DSList)){
+	}else static if(is(T: DSList)){
 		return type == DSType.list;
 	}else static if(is(T: DSMap)){
 		return type == DSType.map;
 	}else static if(is(T: DSPriority)){
 		return type == DSType.priority;
+	}else static if(is(T: DSQueue)){
+		return type == DSType.queue;
+	}else static if(is(T: DSStack)){
+		return type == DSType.stack;
 	}else static assert(0, "Bad `ind` type: "~typeof(ind).stringof);
 }
 alias ds_exists = dsExists;

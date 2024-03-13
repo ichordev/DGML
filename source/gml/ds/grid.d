@@ -410,3 +410,41 @@ void dsGridAddGridRegion(ref DSGrid index, DSGrid source, size_t x1, size_t y1, 
 	}
 }
 alias ds_grid_add_grid_region = dsGridAddGridRegion;
+
+void dsGridMultiply(N)(ref DSGrid index, size_t x, size_t y, N val)
+if(__traits(isArithmetic, N)){
+	index.data[y][x] = index.data[y][x] * val;
+}
+alias ds_grid_multiply = dsGridMultiply;
+
+//TODO: ds_grid_multiply_disk
+
+//TODO: ds_grid_multiply_region
+
+//TODO: ds_grid_multiply_grid_region
+
+//TODO: ds_grid_value_exists
+
+//TODO: ds_grid_value_disk_exists
+
+//TODO: ds_grid_value_x
+
+//TODO: ds_grid_value_y
+
+//TODO: ds_grid_value_disk_x
+
+//TODO: ds_grid_value_disk_y
+
+void dsGridCopy(ref DSGrid destination, DSGrid source){
+	destination.setDimensions(source.width, source.height);
+	foreach(i, ref row; destination.data){
+		row[] = source.data[i][];
+	}
+}
+alias ds_grid_copy = dsGridCopy;
+
+//TODO: ds_grid_read
+
+//TODO: ds_grid_write
+
+//TODO: ds_grid_to_mp_grid

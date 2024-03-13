@@ -3,7 +3,8 @@ module gml.draw;
 public import
 	gml.draw.colour,
 	gml.draw.form,
-	gml.draw.gpu;
+	gml.draw.gpu,
+	gml.draw.texture;
 
 import ic.vec;
 static if(hasBgfx){
