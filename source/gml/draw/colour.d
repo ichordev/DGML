@@ -152,7 +152,7 @@ alias merge_colour = mergeColour;
 
 //Set the various different options for drawing to the screen
 
-static if(hasBgfx){
+version(Have_bindbc_bgfx){
 	import bindbc.bgfx;
 	
 	void drawClear(uint col) nothrow @nogc{

@@ -6,15 +6,19 @@ public import
 	gml.draw.gpu,
 	gml.draw.texture;
 
+import std.math;
 import ic.vec;
-static if(hasBgfx){
+version(Have_bindbc_bgfx){
 	import bindbc.bgfx;
 }
 
-enum hasBgfx = is(typeof({ import bindbc.bgfx; }));
-
 struct GPUState{
 	float[4] col = [1f, 1f, 1f, 1f];
+	@property uint intCol() nothrow @nogc pure @safe =>
+		cast(uint)round(col[0] * 255f) <<  0 |
+		cast(uint)round(col[1] * 255f) <<  8 |
+		cast(uint)round(col[2] * 255f) << 16 |
+		cast(uint)round(col[3] * 255f) << 24;
 	
 	Mat4 getTransform() nothrow @nogc pure @safe =>
 		transform.translate(Vec3!float(0f, 0f, depth));
@@ -25,7 +29,7 @@ struct GPUState{
 	bool zTest = false;
 	bool alphaTest = false;
 	
-	static if(hasBgfx){
+	version(Have_bindbc_bgfx){
 		ulong getBgfxState() nothrow @nogc pure @safe =>
 			write | blending | culling
 			| (zTest ? zFunc : 0)
@@ -47,7 +51,7 @@ struct GPUState{
 }
 GPUState gpuState;
 
-static if(hasBgfx){
+version(Have_bindbc_bgfx){
 	struct VertPos{
 		float x,y;
 		

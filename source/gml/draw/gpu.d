@@ -1,7 +1,7 @@
 module gml.draw.gpu;
 
 import gml.draw;
-static if(hasBgfx){
+version(Have_bindbc_bgfx){
 	import bindbc.bgfx;
 }
 
@@ -38,7 +38,7 @@ bool gpuGetZTestEnable() nothrow @nogc @safe =>
 	gpuState.zTest;
 alias gpu_get_ztestenable = gpuGetZTestEnable;
 
-static if(hasBgfx){
+version(Have_bindbc_bgfx){
 	CmpFunc gpuGetZFunc() nothrow @nogc @safe{
 		with(StateDepthTest) switch(gpuState.zFunc){
 			case less:     return CmpFunc.less;
@@ -65,7 +65,7 @@ alias gpu_get_depth = gpuGetDepth;
 
 //TODO: gpu_get_fog?
 
-static if(hasBgfx){
+version(Have_bindbc_bgfx){
 	Cull gpuGetCullMode() nothrow @nogc @safe{
 		with(StateCull) switch(gpuState.culling){
 			case 0:             return Cull.noCulling;

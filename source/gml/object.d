@@ -73,13 +73,13 @@ class GMObject{
 	alias image_yscale = imageYScale;
 	SpriteAsset maskIndex = new SpriteAsset(-1);
 	alias mask_index = maskIndex;
-	final @property int bboxBottom() nothrow @nogc pure @safe => y; //TODO: get bbox
+	final @property int bboxBottom() nothrow @nogc pure @safe => cast(int)ceil(y); //TODO: get bbox
 	alias bbox_bottom = bboxBottom;
-	final @property int bboxLeft() nothrow @nogc pure @safe => x;
+	final @property int bboxLeft() nothrow @nogc pure @safe => cast(int)floor(x);
 	alias bbox_left = bboxLeft;
-	final @property int bboxRight() nothrow @nogc pure @safe => x;
+	final @property int bboxRight() nothrow @nogc pure @safe => cast(int)ceil(x);
 	alias bbox_right = bboxRight;
-	final @property int bboxTop() nothrow @nogc pure @safe => y;
+	final @property int bboxTop() nothrow @nogc pure @safe => cast(int)floor(y);
 	alias bbox_top = bboxTop;
 	
 	this(bool persistent){
@@ -87,7 +87,7 @@ class GMObject{
 	}
 	
 	final void instanceDestroy(){
-		instanceDestroy(this);
+		.instanceDestroy(this);
 	}
 	alias instance_destroy = instanceDestroy;
 	
@@ -153,7 +153,7 @@ Obj instanceCreateDepth(Obj)(float x, float y, float depth){
 }
 alias instance_create_depth = instanceCreateDepth;
 
-void instanceDestroy(Obj)(Obj id, executeEventFlag=true){
+void instanceDestroy(Obj)(Obj id, bool executeEventFlag=true){
 	if(executeEventFlag){
 		id.onDestroy();
 	}

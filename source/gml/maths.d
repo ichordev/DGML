@@ -403,12 +403,12 @@ alias darctan2 = datan2;
 
 F degToRad(F)(F val) nothrow @nogc pure @safe
 if(__traits(isFloating, F)) =>
-	val * F(PI) / F(180);
+	val * F(pi) / F(180);
 alias degtorad = degToRad;
 
 F radToDeg(F)(F val) nothrow @nogc pure @safe
 if(__traits(isFloating, F)) =>
-	val * F(180) / F(PI);
+	val * F(180) / F(pi);
 alias radtodeg = radToDeg;
 
 F pointDirection(F)(F x1, F y1, F x2, F y2) nothrow @nogc pure @safe

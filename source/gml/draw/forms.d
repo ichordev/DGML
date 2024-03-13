@@ -2,8 +2,13 @@ module gml.draw.forms;
 
 import gml.draw;
 
-static if(hasBgfx):
+import std.algorithm.comparison, std.math;
+import ic.calc, ic.vec;
+
+version(Have_bindbc_bgfx):
 import bindbc.bgfx;
+
+bgfx.UniformHandle u_col;
 
 void drawVerts(VertPos[] verts, StatePT state=cast(StatePT)0){
 	const vertNum = bgfx.getAvailTransientVertexBuffer(cast(uint)verts.length, VertPos.layout);
@@ -54,10 +59,9 @@ void drawVerts(VertPosColTex[] verts, StatePT state=cast(StatePT)0){
 }
 
 void drawCircle(float x, float y, float radius, bool outline){
-	precision = max(precision, 4);
 	VertPos[] verts;
 	if(outline){
-		verts.length = precision+1;
+		verts.length = circlePrecision+1;
 		{
 			const vert = VertPos(x + cos(0.0) * radius, y + sin(0.0) * radius);
 			verts[0]   = vert;
@@ -66,37 +70,6 @@ void drawCircle(float x, float y, float radius, bool outline){
 		double dir = 0.0;
 		foreach(ref vert; verts[0..$-1]){
 			vert = VertPos(x + cos(dir) * radius, y + sin(dir) * radius);
-			dir += (PI*2.0) / cast(double)precision;
-		}
-		
-		drawVerts(verts, StatePT.lineStrip);
-	}else{
-		verts.length = precision*3;
-		double dir = 0.0;
-		for(size_t i=0; i<verts.length; i+=3){
-			verts[i+0] = VertPos(x, y);
-			verts[i+1] = VertPos(x + cos(dir) * radius, y + sin(dir) * radius);
-			dir += (PI*2.0) / cast(double)precision;
-			verts[i+2] = VertPos(x + cos(dir) * radius, y + sin(dir) * radius);
-		}
-		drawVerts(verts);
-	}
-}
-alias draw_circle = drawCircle;
-
-void drawCircleColour(float x, float y, float radius, uint col1, uint col2, bool outline){
-	precision = max(precision, 4);
-	VertPosCol[] verts;
-	if(outline){
-		verts.length = precision+1;
-		{
-			const vert = VertPosCol(x + cos(0.0) * radius, y + sin(0.0) * radius, colA2);
-			verts[0]   = vert;
-			verts[$-1] = vert;
-		}
-		double dir = 0.0;
-		foreach(ref vert; verts[0..$-1]){
-			vert = VertPosCol(x + cos(dir) * radius, y + sin(dir) * radius, colA2);
 			dir += (PI*2.0) / cast(double)circlePrecision;
 		}
 		
@@ -105,10 +78,40 @@ void drawCircleColour(float x, float y, float radius, uint col1, uint col2, bool
 		verts.length = circlePrecision*3;
 		double dir = 0.0;
 		for(size_t i=0; i<verts.length; i+=3){
-			verts[i+0] = VertPosCol(x, y, colA1);
-			verts[i+1] = VertPosCol(x + cos(dir) * radius, y + sin(dir) * radius, colA2);
+			verts[i+0] = VertPos(x, y);
+			verts[i+1] = VertPos(x + cos(dir) * radius, y + sin(dir) * radius);
 			dir += (PI*2.0) / cast(double)circlePrecision;
-			verts[i+2] = VertPosCol(x + cos(dir) * radius, y + sin(dir) * radius, colA2);
+			verts[i+2] = VertPos(x + cos(dir) * radius, y + sin(dir) * radius);
+		}
+		drawVerts(verts);
+	}
+}
+alias draw_circle = drawCircle;
+
+void drawCircleColour(float x, float y, float radius, uint col1, uint col2, bool outline){
+	VertPosCol[] verts;
+	if(outline){
+		verts.length = circlePrecision+1;
+		{
+			const vert = VertPosCol(x + cos(0.0) * radius, y + sin(0.0) * radius, col2);
+			verts[0]   = vert;
+			verts[$-1] = vert;
+		}
+		double dir = 0.0;
+		foreach(ref vert; verts[0..$-1]){
+			vert = VertPosCol(x + cos(dir) * radius, y + sin(dir) * radius, col2);
+			dir += (PI*2.0) / cast(double)circlePrecision;
+		}
+		
+		drawVerts(verts, StatePT.lineStrip);
+	}else{
+		verts.length = circlePrecision*3;
+		double dir = 0.0;
+		for(size_t i=0; i<verts.length; i+=3){
+			verts[i+0] = VertPosCol(x, y, col1);
+			verts[i+1] = VertPosCol(x + cos(dir) * radius, y + sin(dir) * radius, col2);
+			dir += (PI*2.0) / cast(double)circlePrecision;
+			verts[i+2] = VertPosCol(x + cos(dir) * radius, y + sin(dir) * radius, col2);
 		}
 		drawVerts(verts);
 	}
@@ -181,24 +184,25 @@ void drawArrow(float x1, float y1, float x2, float y2, float size){
 		y2 + sin(dir-pi2)*size,
 		x2 + cos(dir+pi2)*size,
 		y2 + sin(dir+pi2)*size,
+		false,
 	);
 }
 alias draw_arrow = drawArrow;
 
 void drawButton(float x1, float y1, float x2, float y2, bool up){
 	enum margin = 2f;
-	const stateAlpha = gpuState.intColAlpha & 0xFF_00_00_00;
-	const col1 = (up ? C.lightGrey : C.darkGrey) | stateAlpha;
-	const col2 = (up ? C.darkGrey : C.lightGrey) | stateAlpha;
+	const stateAlpha = gpuState.intCol & 0xFF_00_00_00;
+	const col1 = (up ? C.ltGrey : C.dkGrey) | stateAlpha;
+	const col2 = (up ? C.dkGrey : C.ltGrey) | stateAlpha;
 	drawVerts([
 		//inner area
-		VertPosCol(x1, y1, gpuState.intColAlpha),
-		VertPosCol(x2, y1, gpuState.intColAlpha),
-		VertPosCol(x1, y2, gpuState.intColAlpha),
+		VertPosCol(x1, y1, gpuState.intCol),
+		VertPosCol(x2, y1, gpuState.intCol),
+		VertPosCol(x1, y2, gpuState.intCol),
 		
-		VertPosCol(x2, y1, gpuState.intColAlpha),
-		VertPosCol(x1, y2, gpuState.intColAlpha),
-		VertPosCol(x2, y2, gpuState.intColAlpha),
+		VertPosCol(x2, y1, gpuState.intCol),
+		VertPosCol(x1, y2, gpuState.intCol),
+		VertPosCol(x2, y2, gpuState.intCol),
 		//top
 		VertPosCol(x1, y1, col1),
 		VertPosCol(x1-margin, y1-margin, col1),
@@ -299,7 +303,7 @@ void drawLineWidth(float x1, float y1, float x2, float y2, float w){
 		
 		VertPos(x2 + cos(dir+pi2)*w, y2 + sin(dir+pi2)*w),
 		VertPos(x2 + cos(dir-pi2)*w, y2 + sin(dir-pi2)*w),
-	], PT.vertStrip);
+	], StatePT.triStrip);
 }
 
 void drawLineWidthColour(float x1, float y1, float x2, float y2, float w, uint col1, uint col2){
@@ -310,7 +314,7 @@ void drawLineWidthColour(float x1, float y1, float x2, float y2, float w, uint c
 		
 		VertPosCol(x2 + cos(dir+pi2)*w, y2 + sin(dir+pi2)*w, col2),
 		VertPosCol(x2 + cos(dir-pi2)*w, y2 + sin(dir-pi2)*w, col2),
-	], PT.vertStrip);
+	], StatePT.triStrip);
 }
 
 uint circlePrecision = 24;

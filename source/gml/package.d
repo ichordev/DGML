@@ -1,6 +1,7 @@
 module gml;
 
 public import
+	gml.collision,
 	gml.draw,
 	gml.ds,
 	gml.game,

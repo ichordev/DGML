@@ -2,12 +2,12 @@ module gml.draw.texture;
 
 import gml.draw;
 
-static if(hasBgfx){
+version(Have_bindbc_bgfx){
 	import bindbc.bgfx;
 }
 
 class Texture{
-	static if(hasBgfx){
+	version(Have_bindbc_bgfx){
 		bgfx.TextureHandle handle;
 	}
 	void[] data;
