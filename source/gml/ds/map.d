@@ -1,6 +1,6 @@
 module gml.ds.map;
 
-import gml.ds;
+import gml.ds.list;
 
 import core.memory;
 import std.algorithm.searching, std.variant;

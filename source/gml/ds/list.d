@@ -1,6 +1,6 @@
 module gml.ds.list;
 
-import gml.ds, gml.maths;
+import gml.ds.map, gml.maths;
 
 import core.exception, core.memory;
 import std.algorithm.sorting, std.conv, std.math, std.random, std.typecons, std.variant, std.uni;
@@ -165,7 +165,7 @@ unittest{
 }
 
 void dsListShuffle(ref DSList id) nothrow @nogc @safe{
-	randomShuffle(id.data, gml.maths.rng);
+	id.data.randomShuffle(gml.maths.rng);
 }
 alias ds_list_shuffle = dsListShuffle;
 unittest{
