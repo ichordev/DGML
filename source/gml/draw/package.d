@@ -2,7 +2,7 @@ module gml.draw;
 
 public import
 	gml.draw.colour,
-	gml.draw.form,
+	gml.draw.forms,
 	gml.draw.gpu,
 	gml.draw.texture;
 
@@ -41,6 +41,53 @@ struct GPUState{
 		ulong alphaRef = (() @trusted => toStateAlphaRef(0))();
 		
 		bgfx.ViewID view = 0;
+		
+		bgfx.ProgramHandle program;
 	}
 }
 GPUState gpuState;
+
+static if(hasBgfx){
+	struct VertPos{
+		float x,y;
+		
+		static bgfx.VertexLayout layout;
+		static void ini(){
+			layout.begin()
+				.add(Attrib.position,  2, AttribType.float_)
+			.end();
+		}
+	}
+	struct VertPosCol{
+		float x,y;
+		uint col;
+		
+		static bgfx.VertexLayout layout;
+		static void ini(){
+			layout.begin()
+				.add(Attrib.position,  2, AttribType.float_)
+				.add(Attrib.colour0,   4, AttribType.uint8, true)
+			.end();
+		}
+	}
+	struct VertPosColTex{
+		float x,y;
+		uint col;
+		float u,v;
+		
+		static bgfx.VertexLayout layout;
+		static void ini(){
+			layout.begin()
+				.add(Attrib.position,  2, AttribType.float_)
+				.add(Attrib.colour0,   4, AttribType.uint8, true)
+				.add(Attrib.texCoord0, 2, AttribType.float_)
+			.end();
+		}
+	}
+	
+	void initVertFormats(){
+		VertPos.ini();
+		VertPosCol.ini();
+		VertPosColTex.ini();
+	}
+}

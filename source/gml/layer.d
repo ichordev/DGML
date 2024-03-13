@@ -1,4 +1,4 @@
-module gml.asset.layer;
+module gml.layer;
 
 alias LayerID = int;
 

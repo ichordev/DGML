@@ -45,7 +45,7 @@ class GMObject{
 	float yPrevious;
 	alias yprevious = yPrevious;
 	
-	SpriteAsset spriteIndex = -1;
+	SpriteAsset spriteIndex = new SpriteAsset(-1);
 	alias sprite_index = spriteIndex;
 	final @property double spriteWidth() nothrow @nogc pure @safe => double.nan * imageXScale; //TODO: get width
 	alias sprite_width = spriteWidth;
@@ -71,7 +71,7 @@ class GMObject{
 	alias image_xscale = imageXScale;
 	float imageYScale = 1f;
 	alias image_yscale = imageYScale;
-	SpriteAsset maskIndex = -1;
+	SpriteAsset maskIndex = new SpriteAsset(-1);
 	alias mask_index = maskIndex;
 	final @property int bboxBottom() nothrow @nogc pure @safe => y; //TODO: get bbox
 	alias bbox_bottom = bboxBottom;
