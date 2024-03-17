@@ -5,6 +5,10 @@ import gml.ds.list;
 import core.memory;
 import std.algorithm.searching, std.variant;
 
+void init(){
+	
+}
+
 struct DSMap{
 	Variant[Variant] data;
 	alias data this;

@@ -2,6 +2,10 @@ module gml.room;
 
 import ic.vec;
 
+void init(){
+	
+}
+
 Room[] orderedRooms;
 Room room;
 
@@ -14,8 +18,8 @@ struct Viewport{
 }
 
 struct Room{
-	double width = 800.0;
-	double height = 600.0;
+	uint width = 800;
+	uint height = 600;
 	bool persistent = false;
 	bool views = false;
 	Viewport[8] viewports;

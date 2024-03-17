@@ -5,6 +5,10 @@ import gml.layer, gml.maths, gml.sprite;
 import core.memory;
 import std.math;
 
+void init(){
+	
+}
+
 class GMObject{
 	bool visible = true;
 	bool solid;

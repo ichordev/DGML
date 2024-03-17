@@ -5,6 +5,10 @@ import gml.draw;
 import std.algorithm.comparison, std.math;
 import ic.calc, ic.vec;
 
+void init(){
+	
+}
+
 version(Have_bindbc_bgfx):
 import bindbc.bgfx;
 

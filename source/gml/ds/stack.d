@@ -3,6 +3,10 @@ module gml.ds.stack;
 import core.memory;
 import std.variant;
 
+void init(){
+	
+}
+
 struct DSStack{
 	Variant[] data;
 	alias data this;

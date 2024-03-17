@@ -2,6 +2,10 @@ module gml.ds.priority;
 
 import std.algorithm.searching, std.container.binaryheap, std.typecons, std.variant;
 
+void init(){
+	
+}
+
 alias DSPriority = BinaryHeap!(Tuple!(Variant, double)[], "a[1] < b[1]");
 private alias DSPriorityReverse = BinaryHeap!(Tuple!(Variant, double)[], "a[1] > b[1]");
 

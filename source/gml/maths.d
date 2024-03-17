@@ -3,6 +3,10 @@ module gml.maths;
 import std.datetime, std.format, std.math, std.random;
 import ic.calc, ic.ease;
 
+void init(){
+	
+}
+
 alias pi = ic.calc.pi;
 
 //Date And Time
@@ -336,7 +340,7 @@ alias delta_time = deltaTime;
 
 Mt19937 rng;
 
-T choose(T)(T[] vals...) nothrow @nogc @safe =>
+T choose(T)(T[] vals...) @safe =>
 	choice(vals, rng);
 
 double random(double n) @safe =>

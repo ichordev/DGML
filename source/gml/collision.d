@@ -2,6 +2,9 @@ module gml.collision;
 
 import std.algorithm.comparison, std.math;
 
+void init(){
+}
+
 F pointLineDistance(F)(F px, F py, F x1, F y1, F x2, F y2) nothrow @nogc pure @safe
 if(__traits(isFloating, F)){
 	F a = px - x1;

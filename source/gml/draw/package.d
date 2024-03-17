@@ -12,6 +12,19 @@ version(Have_bindbc_bgfx){
 	import bindbc.bgfx;
 }
 
+void init(){
+	version(Have_bindbc_bgfx){
+		VertPos.init();
+		VertPosCol.init();
+		VertPosColTex.init();
+	}
+	
+	gml.draw.colour.init();
+	gml.draw.forms.init();
+	gml.draw.gpu.init();
+	gml.draw.texture.init();
+}
+
 struct GPUState{
 	float[4] col = [1f, 1f, 1f, 1f];
 	@property uint intCol() nothrow @nogc pure @safe =>
@@ -56,7 +69,7 @@ version(Have_bindbc_bgfx){
 		float x,y;
 		
 		static bgfx.VertexLayout layout;
-		static void ini(){
+		static void init(){
 			layout.begin()
 				.add(Attrib.position,  2, AttribType.float_)
 			.end();
@@ -67,7 +80,7 @@ version(Have_bindbc_bgfx){
 		uint col;
 		
 		static bgfx.VertexLayout layout;
-		static void ini(){
+		static void init(){
 			layout.begin()
 				.add(Attrib.position,  2, AttribType.float_)
 				.add(Attrib.colour0,   4, AttribType.uint8, true)
@@ -80,18 +93,12 @@ version(Have_bindbc_bgfx){
 		float u,v;
 		
 		static bgfx.VertexLayout layout;
-		static void ini(){
+		static void init(){
 			layout.begin()
 				.add(Attrib.position,  2, AttribType.float_)
 				.add(Attrib.colour0,   4, AttribType.uint8, true)
 				.add(Attrib.texCoord0, 2, AttribType.float_)
 			.end();
 		}
-	}
-	
-	void initVertFormats(){
-		VertPos.ini();
-		VertPosCol.ini();
-		VertPosColTex.ini();
 	}
 }

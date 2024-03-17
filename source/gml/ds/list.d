@@ -5,6 +5,10 @@ import gml.ds.map, gml.maths;
 import core.exception, core.memory;
 import std.algorithm.sorting, std.conv, std.math, std.random, std.typecons, std.variant, std.uni;
 
+void init(){
+	
+}
+
 struct DSList{
 	Variant[] data;
 	alias data this;

@@ -8,6 +8,15 @@ public import
 	gml.ds.queue,
 	gml.ds.stack;
 
+void init(){
+	gml.ds.grid.init();
+	gml.ds.list.init();
+	gml.ds.map.init();
+	gml.ds.priority.init();
+	gml.ds.queue.init();
+	gml.ds.stack.init();
+}
+
 double dsPrecision = 0.00_00_00_1;
 
 void dsSetPrecision(double prec) nothrow @nogc @safe{

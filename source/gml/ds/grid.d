@@ -5,6 +5,10 @@ import gml.maths;
 import core.memory;
 import std.algorithm.sorting, std.math, std.random, std.variant, std.uni;
 
+void init(){
+	
+}
+
 struct DSGrid{
 	Variant[][] data;
 	alias data this;

@@ -5,6 +5,10 @@ import gml.draw;
 import std.algorithm.comparison, std.math;
 import ic.ease: lerp;
 
+void init(){
+	
+}
+
 enum C{
 	aqua     = 0xFF_FF_00,
 	black    = 0x00_00_00,

@@ -4,6 +4,10 @@ import gml.draw.texture;
 
 import ic.vec;
 
+void init(){
+	
+}
+
 class SpriteAsset{
 	bool valid;
 	Texture tex;

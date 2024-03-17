@@ -5,6 +5,10 @@ version(Have_bindbc_bgfx){
 	import bindbc.bgfx;
 }
 
+void init(){
+	
+}
+
 enum CmpFunc{
 	never, ///Never
 	less, ///Less

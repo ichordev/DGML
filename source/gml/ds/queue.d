@@ -3,6 +3,10 @@ module gml.ds.queue;
 import core.memory;
 import std.variant;
 
+void init(){
+	
+}
+
 struct DSQueue{
 	Variant[] data;
 	alias data this;

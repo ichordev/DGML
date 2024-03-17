@@ -1,9 +1,12 @@
 module gml.draw.texture;
 
 import gml.draw;
-
 version(Have_bindbc_bgfx){
 	import bindbc.bgfx;
+}
+
+void init(){
+	
 }
 
 class Texture{

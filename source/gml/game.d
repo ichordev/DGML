@@ -3,6 +3,10 @@ module gml.game;
 import core.time;
 import std.math;
 
+void init(){
+	
+}
+
 enum GameState{
 	starting,
 	running,
