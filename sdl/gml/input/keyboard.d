@@ -1,8 +1,6 @@
 module gml.input.keyboard;
 
-version(Have_bindbc_sdl){
-	import bindbc.sdl;
-}
+import bindbc.sdl;
 
 void init(){
 	
@@ -81,66 +79,65 @@ alias vk = VK;
 VirtualKeyConstant ord(string string_) nothrow @nogc pure @safe =>
 	cast(VirtualKeyConstant)string_[0];
 
-version(Have_bindbc_sdl):
 enum keycodeSpecialMask = cast(SDL_Keycode)(1U << 29U);
 
 SDL_Keycode getSDLKeycode(VirtualKeyConstant code) nothrow @nogc pure @safe{
 	switch(code){
-		case noKey:        return SDLK_UNKNOWN;
-		case anyKey:       return cast(SDL_Keycode)(keycodeSpecialMask | 0);
-		case left:         return SDLK_LEFT;
-		case right:        return SDLK_RIGHT;
-		case up:           return SDLK_UP;
-		case down:         return SDLK_DOWN;
-		case enter:        return SDLK_RETURN;
-		case escape:       return SDLK_ESCAPE;
-		case space:        return SDLK_SPACE;
-		case shift:        return cast(SDL_Keycode)(keycodeSpecialMask | 1);
-		case control:      return cast(SDL_Keycode)(keycodeSpecialMask | 2);
-		case alt:          return cast(SDL_Keycode)(keycodeSpecialMask | 3);
-		case backspace:    return SDLK_BACKSPACE;
-		case tab:          return SDLK_TAB;
-		case home:         return SDLK_HOME;
-		case end:          return SDLK_END;
-		case delete_:      return SDLK_DELETE;
-		case insert:       return SDLK_INSERT;
-		case pageup:       return SDLK_PAGEUP;
-		case pagedown:     return SDLK_PAGEDOWN;
-		case pause:        return SDLK_PAUSE;
-		case printScreen:  return SDLK_PRINTSCREEN;
-		case f1:           return SDLK_F1;
-		case f2:           return SDLK_F2;
-		case f3:           return SDLK_F3;
-		case f4:           return SDLK_F4;
-		case f5:           return SDLK_F5;
-		case f6:           return SDLK_F6;
-		case f7:           return SDLK_F7;
-		case f8:           return SDLK_F8;
-		case f9:           return SDLK_F9;
-		case f10:          return SDLK_F10;
-		case f11:          return SDLK_F11;
-		case f12:          return SDLK_F12;
-		case numpad0:      return SDLK_KP_0;
-		case numpad1:      return SDLK_KP_1;
-		case numpad2:      return SDLK_KP_2;
-		case numpad3:      return SDLK_KP_3;
-		case numpad4:      return SDLK_KP_4;
-		case numpad5:      return SDLK_KP_5;
-		case numpad6:      return SDLK_KP_6;
-		case numpad7:      return SDLK_KP_7;
-		case numpad8:      return SDLK_KP_8;
-		case numpad9:      return SDLK_KP_9;
-		case multiply:     return SDLK_KP_MEMMULTIPLY;
-		case divide:       return SDLK_KP_MEMDIVIDE;
-		case add:          return SDLK_KP_MEMADD;
-		case subtract:     return SDLK_KP_MEMSUBTRACT;
-		case decimal:      return SDLK_KP_DECIMAL;
-		case lShift:       return SDLK_LSHIFT;
-		case lControl:     return SDLK_LCTRL;
-		case lAlt:         return SDLK_LALT;
-		case rShift:       return SDLK_RSHIFT;
-		case rControl:     return SDLK_RCTRL;
-		case rAlt:         return SDLK_RALT;
+		case VK.noKey:        return SDLK_UNKNOWN;
+		case VK.anyKey:       return cast(SDL_Keycode)(keycodeSpecialMask | 0);
+		case VK.left:         return SDLK_LEFT;
+		case VK.right:        return SDLK_RIGHT;
+		case VK.up:           return SDLK_UP;
+		case VK.down:         return SDLK_DOWN;
+		case VK.enter:        return SDLK_RETURN;
+		case VK.escape:       return SDLK_ESCAPE;
+		case VK.space:        return SDLK_SPACE;
+		case VK.shift:        return cast(SDL_Keycode)(keycodeSpecialMask | 1);
+		case VK.control:      return cast(SDL_Keycode)(keycodeSpecialMask | 2);
+		case VK.alt:          return cast(SDL_Keycode)(keycodeSpecialMask | 3);
+		case VK.backspace:    return SDLK_BACKSPACE;
+		case VK.tab:          return SDLK_TAB;
+		case VK.home:         return SDLK_HOME;
+		case VK.end:          return SDLK_END;
+		case VK.delete_:      return SDLK_DELETE;
+		case VK.insert:       return SDLK_INSERT;
+		case VK.pageup:       return SDLK_PAGEUP;
+		case VK.pagedown:     return SDLK_PAGEDOWN;
+		case VK.pause:        return SDLK_PAUSE;
+		case VK.printScreen:  return SDLK_PRINTSCREEN;
+		case VK.f1:           return SDLK_F1;
+		case VK.f2:           return SDLK_F2;
+		case VK.f3:           return SDLK_F3;
+		case VK.f4:           return SDLK_F4;
+		case VK.f5:           return SDLK_F5;
+		case VK.f6:           return SDLK_F6;
+		case VK.f7:           return SDLK_F7;
+		case VK.f8:           return SDLK_F8;
+		case VK.f9:           return SDLK_F9;
+		case VK.f10:          return SDLK_F10;
+		case VK.f11:          return SDLK_F11;
+		case VK.f12:          return SDLK_F12;
+		case VK.numpad0:      return SDLK_KP_0;
+		case VK.numpad1:      return SDLK_KP_1;
+		case VK.numpad2:      return SDLK_KP_2;
+		case VK.numpad3:      return SDLK_KP_3;
+		case VK.numpad4:      return SDLK_KP_4;
+		case VK.numpad5:      return SDLK_KP_5;
+		case VK.numpad6:      return SDLK_KP_6;
+		case VK.numpad7:      return SDLK_KP_7;
+		case VK.numpad8:      return SDLK_KP_8;
+		case VK.numpad9:      return SDLK_KP_9;
+		case VK.multiply:     return SDLK_KP_MEMMULTIPLY;
+		case VK.divide:       return SDLK_KP_MEMDIVIDE;
+		case VK.add:          return SDLK_KP_MEMADD;
+		case VK.subtract:     return SDLK_KP_MEMSUBTRACT;
+		case VK.decimal:      return SDLK_KP_DECIMAL;
+		case VK.lShift:       return SDLK_LSHIFT;
+		case VK.lControl:     return SDLK_LCTRL;
+		case VK.lAlt:         return SDLK_LALT;
+		case VK.rShift:       return SDLK_RSHIFT;
+		case VK.rControl:     return SDLK_RCTRL;
+		case VK.rAlt:         return SDLK_RALT;
 		case 'A': return SDLK_a; case 'B': return SDLK_b; case 'C': return SDLK_c;
 		case 'D': return SDLK_d; case 'E': return SDLK_e; case 'F': return SDLK_f;
 		case 'G': return SDLK_g; case 'H': return SDLK_h; case 'I': return SDLK_i;
@@ -153,5 +150,6 @@ SDL_Keycode getSDLKeycode(VirtualKeyConstant code) nothrow @nogc pure @safe{
 		case '1': return SDLK_1; case '2': return SDLK_2; case '3': return SDLK_3;
 		case '4': return SDLK_4; case '5': return SDLK_5; case '6': return SDLK_6;
 		case '7': return SDLK_7; case '8': return SDLK_8; case '9': return SDLK_9;
+		default: return SDLK_UNKNOWN;
 	}
 }

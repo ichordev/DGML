@@ -1,38 +1,22 @@
 module gml;
 
 public import
-	gml.audio,
-	gml.collision,
-	gml.draw,
-	gml.ds,
-	gml.game,
-	gml.input,
+	gml.core,
+	gml.sdl,
+	gml.bgfx,
+	
 	gml.layer,
-	gml.maths,
-	gml.object,
-	gml.room,
-	gml.sprite,
-	gml.window;
-
-import std.exception;
+	gml.object;
 
 /**
 Before calling this function:
-You must have declared at least one room. (for `gml.window`)
-
+- You must have declared at least one room. (for `gml.window`)
 */
-void init(){
-	gml.window.init();
-	gml.audio.init();
-	gml.draw.init();
+void initAll(){
+	gml.core.init();
+	gml.sdl.init();
+	gml.bgfx.init();
 	
-	gml.collision.init();
-	gml.ds.init();
-	gml.game.init();
-	gml.input.init();
 	gml.layer.init();
-	gml.maths.init();
 	gml.object.init();
-	gml.room.init();
-	gml.sprite.init();
 }

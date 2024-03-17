@@ -2,6 +2,12 @@
 
 De-GML is here to help (former) GameMaker users wishing to port their games into D.
 
+| Sub-package | Description |
+|-------------|-------------|
+|`de-gml-core`| Core functionality. Depends on `ichor`. |
+|`de-gml-sdl` | For windowing and input. Depends on `bindbc-sdl`. |
+|`de-gml-bgfx`| For drawing. Depends on `bindbc-bgfx` and `de-gml-sdl`. |
+
 The library mainly focuses on 2D GameMaker games without custom rendering setups. If you've done custom/3D rendering in GameMaker, you're probably up to doing the rendering yourself by using [bgfx](https://github.com/bkaradzic/bgfx/)'s [D bindings](https://github.com/BindBC/bindbc-bgfx).
 
 DeGML's API uses GameMaker function names converted to D-style camelCase, but has aliases for the exact function names.

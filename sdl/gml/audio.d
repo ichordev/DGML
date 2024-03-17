@@ -1,6 +1,6 @@
 module gml.audio;
 
-import std.algorithm.comparison, std.exception, std.string;
+import std.algorithm.comparison, std.exception, std.math, std.string;
 
 void init(){
 	version(Have_bindbc_sdl){
@@ -29,16 +29,6 @@ struct SoundAsset{
 }
 
 alias SoundInstanceID = int;
-
-SoundInstanceID findPlayingSoundInstance(SoundAsset index) nothrow @nogc{
-	auto channels = Mix_AllocateChannels(-1);
-	foreach(channel; 0..channels){
-		if(Mix_GetChunk(index) is index.data){
-			return channel;
-		}
-	}
-	return -1;
-}
 
 struct PlayingSoundInstances{
 	const Mix_Chunk* searchQuery;
@@ -82,7 +72,7 @@ double audioSoundLength(SoundAsset index) nothrow @nogc{
 	}
 	
 	auto multiChannelSamples = index.data.alen / ((format & 0xFF) / 8);
-	return (multiChannelSamples / channels) / cast(double)sampleRate;
+	return (multiChannelSamples / channelNum) / cast(double)sampleRate;
 }
 double audioSoundLength(SoundInstanceID index) nothrow @nogc => audioSoundLength(SoundAsset(index));
 alias audio_sound_length = audioSoundLength;
@@ -95,7 +85,7 @@ alias audio_sound_is_playable = audioSoundIsPlayable;
 ///Note that priority is currently ignored.
 SoundInstanceID audioPlaySound(SoundAsset index, float priority, bool loop) nothrow @nogc{
 	if(index.playPos > 0.0){
-		return audioPlaySoundAtTime(ret, priority, loop, playPos);
+		return audioPlaySoundAtTime(index, priority, loop, index.playPos);
 	}else{
 		return Mix_PlayChannel(-1, index.data, loop ? -1 : 0);
 	}
@@ -112,15 +102,16 @@ private{
 	}
 	extern(C) void channelStartTimeMix(int channel, void* stream, int streamLen, void* userData) nothrow @nogc{
 		auto timeData = cast(TimeData*)userData;
+		auto streamArr = (cast(ubyte*)stream)[0..streamLen];
 		
-		if(loop){
-			timeData.buffer[] = stream[0..offset];
+		if(timeData.loop){
+			timeData.buffer[] = streamArr[0..timeData.offset];
 		}
-		stream[0..streamLen-offset] = stream[offset..streamLen];
-		if(loop){
-			stream[streamLen-offset..streamLen] = timeData.buffer[];
+		streamArr[0..streamLen-timeData.offset] = streamArr[timeData.offset..streamLen];
+		if(timeData.loop){
+			streamArr[streamLen-timeData.offset..streamLen] = timeData.buffer[];
 		}else{
-			stream[streamLen-offset..streamLen] = 0;
+			streamArr[streamLen-timeData.offset..streamLen] = 0;
 		}
 		
 		timeData.offset = (timeData.offset + timeData.offset) % streamLen;
@@ -134,8 +125,8 @@ private{
 	}
 }
 SoundInstanceID audioPlaySoundAtTime(SoundAsset index, float priority, bool loop, double time, SoundInstanceID channel=-1) nothrow @nogc{
-	auto timeData = cast(TimeData*)SDL_malloc(StartTimeData.sizeof);
-	timeData = StartTimeData.init;
+	auto timeData = cast(TimeData*)SDL_malloc(TimeData.sizeof);
+	*timeData = TimeData.init;
 	timeData.loop = loop;
 	timeData.offset = {
 		int sampleRate, channelNum;
@@ -143,14 +134,14 @@ SoundInstanceID audioPlaySoundAtTime(SoundAsset index, float priority, bool loop
 		if(!Mix_QuerySpec(&sampleRate, &format, &channelNum)){
 			return 0;
 		}
-		return cast(int)round(time * sampleRate * ((format & 0xFF) / 8) * channels);
+		return cast(int)round(time * sampleRate * ((format & 0xFF) / 8) * channelNum);
 	}();
 	if(loop){
 		timeData.buffer = (cast(ubyte*)SDL_malloc(timeData.offset))[0..timeData.offset];
 	}
 	
 	channel = Mix_PlayChannel(channel, index.data, 0);
-	Mix_RegisterEffect(channel, &channelStartTimeMix, &channelStartTimeDone, cast(void*)loopData);
+	Mix_RegisterEffect(channel, &channelStartTimeMix, &channelStartTimeDone, cast(void*)timeData);
 	return channel;
 }
 
@@ -189,7 +180,7 @@ void audioResumeAll() nothrow @nogc{
 alias audio_resume_all = audioResumeAll;
 
 void audioStopSound(SoundInstanceID index) nothrow @nogc{
-	Mix_Halt(index);
+	Mix_HaltChannel(index);
 }
 void audioStopSound(SoundAsset index) nothrow @nogc{
 	foreach(id; PlayingSoundInstances(index)){
@@ -199,7 +190,7 @@ void audioStopSound(SoundAsset index) nothrow @nogc{
 alias audio_stop_sound = audioStopSound;
 
 void audioStopAll() nothrow @nogc{
-	Mix_Halt(-1);
+	Mix_HaltChannel(-1);
 }
 alias audio_stop_all = audioStopAll;
 
@@ -233,13 +224,13 @@ alias audio_is_paused = audioIsPaused;
 
 //TODO: audio_sound_get_pitch
 
-void audioSoundSetTrackPosition(SoundAsset index, double time) nothrow @nogc pure @safe{
+void audioSoundSetTrackPosition(SoundAsset index, double time) nothrow @nogc{
 	index.playPos = clamp(time, 0.0, audioSoundLength(index));
 }
 ///Function requires extra `loop` parameter, because we cannot retrieve whether a chunk is looping or not from SDL_Mixer :(
 void audioSoundSetTrackPosition(SoundInstanceID index, double time, bool loop=true) nothrow @nogc{
-	auto asset = Mix_GetChunk(index);
-	if(asset is null) return;
+	auto asset = SoundAsset(index);
+	if(asset.data is null) return;
 	audioStopSound(index);
 	audioPlaySoundAtTime(asset, float.infinity, loop, time, index);
 }
@@ -299,7 +290,7 @@ alias audio_channel_num = audioChannelNum;
 
 //Audio Streams
 
-SoundAsset audioCreateStream(string filename) nothrow @nogc =>
+SoundAsset audioCreateStream(string filename) nothrow =>
 	SoundAsset(Mix_LoadWAV(filename.toStringz()));
 alias audio_create_stream = audioCreateStream;
 

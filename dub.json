@@ -5,13 +5,48 @@
 	"license": "LGPL-3.0-or-later",
 	
 	"dependencies": {
-		"bindbc-bgfx": "~>1.2.0",
-		"bindbc-sdl": "~>1.4.5",
-		"ichor": "~>0.1.0",
+		"de-gml:core": "*",
+		"de-gml:sdl": "*",
+		"de-gml:bgfx": "*",
 	},
+	
+	"subPackages": [
+		{
+			"name": "core",
+			"sourcePaths": ["core"],
+			"importPaths": ["core"],
+			"dependencies": {
+				"ichor": "~>0.1.0",
+			},
+			"targetPath": "lib",
+			"targetName": "De-GML-core",
+		},
+		{
+			"name": "sdl",
+			"sourcePaths": ["sdl"],
+			"importPaths": ["sdl"],
+			"dependencies": {
+				"de-gml:core": "*",
+				"bindbc-sdl": ">=1.3.0",
+			},
+			"targetPath": "lib",
+			"targetName": "De-GML-SDL",
+		},
+		{
+			"name": "bgfx",
+			"sourcePaths": ["bgfx"],
+			"importPaths": ["bgfx"],
+			"dependencies": {
+				"de-gml:core": "*",
+				"de-gml:sdl": "*",
+				"bindbc-bgfx": ">=1.0.0",
+			},
+			"targetPath": "lib",
+			"targetName": "De-GML-bgfx",
+		},
+	],
 	
 	"targetType": "staticLibrary",
 	"targetPath": "lib",
 	"targetName": "De-GML",
-	
 }

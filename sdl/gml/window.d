@@ -1,33 +1,28 @@
 module gml.window;
 
-import gml.room;
+import gml.input, gml.room;
 
 import std.exception, std.string;
-version(Have_bindbc_sdl){
-	import bindbc.sdl;
-}
+import bindbc.sdl;
 
 void init(){
-	version(Have_bindbc_sdl){
-		enforce(SDL_InitSubSystem(SDL_INIT_VIDEO) == 0, "SDL failed to initialise video: %s".format(SDL_GetError().fromStringz()));
-		
-		window = SDL_CreateWindow("Isladventure",
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
-			orderedRooms[0].width, orderedRooms[0].height,
-			SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
-		);
-		enforce(window !is null, "SDL window creation error: %s".format(SDL_GetError().fromStringz()));
-	}
+	enforce(SDL_InitSubSystem(SDL_INIT_VIDEO) == 0, "SDL failed to initialise video: %s".format(SDL_GetError().fromStringz()));
+	
+	window = SDL_CreateWindow("Isladventure",
+		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_UNDEFINED,
+		orderedRooms[0].width, orderedRooms[0].height,
+		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
+	);
+	enforce(window !is null, "SDL window creation error: %s".format(SDL_GetError().fromStringz()));
 }
 
-version(Have_bindbc_sdl):
 SDL_Window* window;
 
 ///Returns `false` if the program should exit.
 bool processEvents(){
-	gml.resetKeysPressed();
-	resetMousePressed();
+	//gml.input.keyboard.resetPressed();
+	//gml.input.mouse.resetPressed();
 	
 	SDL_Event event;
 	while(SDL_PollEvent(&event)){
@@ -35,17 +30,17 @@ bool processEvents(){
 			case SDL_WINDOWEVENT:
 				switch(event.window.event){
 					case SDL_WINDOWEVENT_SIZE_CHANGED:
-						onWindowResize(event.window.data1, event.window.data2);
+						//onWindowResize(event.window.data1, event.window.data2);
 						break;
 					default:
 				}
 				break;
 			case SDL_KEYDOWN:
 				if(event.key.repeat != 0) break;
-				setKeyPressed(cast(Key)event.key.keysym.scancode);
+				//gml.input.keyboard.setPressed(cast(Key)event.key.keysym.scancode);
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				setMousePressed(event.button.button);
+				//gml.input.mouse.setPressed(event.button.button);
 				break;
 			case SDL_QUIT:
 				return false;
