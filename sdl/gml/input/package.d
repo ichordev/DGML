@@ -8,3 +8,8 @@ void init(){
 	gml.input.keyboard.init();
 	gml.input.mouse.init();
 }
+
+void quit(){
+	gml.input.mouse.quit();
+	gml.input.keyboard.quit();
+}

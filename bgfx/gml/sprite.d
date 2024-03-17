@@ -8,6 +8,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 class SpriteAsset{
 	bool valid;
 	Texture tex;

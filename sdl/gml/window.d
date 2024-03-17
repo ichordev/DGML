@@ -17,6 +17,10 @@ void init(){
 	enforce(window !is null, "SDL window creation error: %s".format(SDL_GetError().fromStringz()));
 }
 
+void quit(){
+	SDL_QuitSubSystem(SDL_INIT_VIDEO);
+}
+
 SDL_Window* window;
 
 ///Returns `false` if the program should exit.

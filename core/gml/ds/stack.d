@@ -7,6 +7,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 struct DSStack{
 	Variant[] data;
 	alias data this;

@@ -9,6 +9,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 struct DSList{
 	Variant[] data;
 	alias data this;

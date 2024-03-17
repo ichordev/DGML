@@ -20,3 +20,12 @@ void initAll(){
 	gml.layer.init();
 	gml.object.init();
 }
+
+void quitAll(){
+	gml.object.quit();
+	gml.layer.quit();
+	
+	gml.bgfx.quit();
+	gml.sdl.quit();
+	gml.core.quit();
+}

@@ -9,6 +9,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 class GMObject{
 	bool visible = true;
 	bool solid;

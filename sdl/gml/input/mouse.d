@@ -8,6 +8,10 @@ void init() @safe{
 	resetMouseStates();
 }
 
+void quit(){
+	
+}
+
 alias MouseButtonConstant = uint;
 
 MouseButtonConstant mousePressed;

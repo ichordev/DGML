@@ -6,6 +6,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 alias DSPriority = BinaryHeap!(Tuple!(Variant, double)[], "a[1] < b[1]");
 private alias DSPriorityReverse = BinaryHeap!(Tuple!(Variant, double)[], "a[1] > b[1]");
 

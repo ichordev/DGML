@@ -6,6 +6,10 @@ void init(){
 	room = orderedRooms[0];
 }
 
+void quit(){
+	
+}
+
 Room[] orderedRooms;
 Room room;
 

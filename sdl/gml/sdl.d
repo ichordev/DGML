@@ -18,3 +18,10 @@ void init(){
 	gml.audio.init();
 	gml.input.init();
 }
+
+void quit(){
+	gml.input.quit();
+	gml.audio.quit();
+	gml.window.quit();
+	gml.room.quit();
+}

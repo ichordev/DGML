@@ -9,6 +9,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 version(Have_bindbc_bgfx):
 import bindbc.bgfx;
 

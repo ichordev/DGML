@@ -13,3 +13,10 @@ void init(){
 	gml.game.init();
 	gml.maths.init();
 }
+
+void quit(){
+	gml.maths.quit();
+	gml.game.quit();
+	gml.ds.quit();
+	gml.collision.quit();
+}

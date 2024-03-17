@@ -9,6 +9,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 struct DSMap{
 	Variant[Variant] data;
 	alias data this;

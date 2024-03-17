@@ -9,6 +9,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 struct DSGrid{
 	Variant[][] data;
 	alias data this;

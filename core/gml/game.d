@@ -7,6 +7,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 enum GameState{
 	starting,
 	running,

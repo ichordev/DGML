@@ -7,6 +7,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 alias pi = ic.calc.pi;
 
 //Date And Time

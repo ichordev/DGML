@@ -17,6 +17,15 @@ void init(){
 	gml.ds.stack.init();
 }
 
+void quit(){
+	gml.ds.stack.quit();
+	gml.ds.queue.quit();
+	gml.ds.priority.quit();
+	gml.ds.map.quit();
+	gml.ds.list.quit();
+	gml.ds.grid.quit();
+}
+
 double dsPrecision = 0.00_00_00_1;
 
 void dsSetPrecision(double prec) nothrow @nogc @safe{

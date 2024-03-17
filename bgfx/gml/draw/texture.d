@@ -1,17 +1,18 @@
 module gml.draw.texture;
 
 import gml.draw;
-version(Have_bindbc_bgfx){
-	import bindbc.bgfx;
-}
+
+import bindbc.bgfx;
 
 void init(){
 	
 }
 
+void quit(){
+	
+}
+
 class Texture{
-	version(Have_bindbc_bgfx){
-		bgfx.TextureHandle handle;
-	}
+	bgfx.TextureHandle handle;
 	void[] data;
 }

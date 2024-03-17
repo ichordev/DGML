@@ -18,6 +18,10 @@ void init() @safe{
 	keyboardLastKey = -1;
 }
 
+void quit(){
+	
+}
+
 const(bool)[] keysHeld;
 bool[] keysPressed;
 bool[] keysReleased;

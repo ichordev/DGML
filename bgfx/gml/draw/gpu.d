@@ -1,11 +1,13 @@
 module gml.draw.gpu;
 
 import gml.draw;
-version(Have_bindbc_bgfx){
-	import bindbc.bgfx;
-}
+import bindbc.bgfx;
 
 void init(){
+	
+}
+
+void quit(){
 	
 }
 
@@ -42,26 +44,24 @@ bool gpuGetZTestEnable() nothrow @nogc @safe =>
 	gpuState.zTest;
 alias gpu_get_ztestenable = gpuGetZTestEnable;
 
-version(Have_bindbc_bgfx){
-	CmpFunc gpuGetZFunc() nothrow @nogc @safe{
-		with(StateDepthTest) switch(gpuState.zFunc){
-			case less:     return CmpFunc.less;
-			case lEqual:   return CmpFunc.lessEqual;
-			case equal:    return CmpFunc.equal;
-			case gEqual:   return CmpFunc.greaterEqual;
-			case greater:  return CmpFunc.greater;
-			case notEqual: return CmpFunc.notEqual;
-			case never:    return CmpFunc.never;
-			case always:   return CmpFunc.always;
-			default: assert(0);
-		}
+CmpFunc gpuGetZFunc() nothrow @nogc @safe{
+	with(StateDepthTest) switch(gpuState.zFunc){
+		case less:     return CmpFunc.less;
+		case lEqual:   return CmpFunc.lessEqual;
+		case equal:    return CmpFunc.equal;
+		case gEqual:   return CmpFunc.greaterEqual;
+		case greater:  return CmpFunc.greater;
+		case notEqual: return CmpFunc.notEqual;
+		case never:    return CmpFunc.never;
+		case always:   return CmpFunc.always;
+		default: assert(0);
 	}
-	alias gpu_get_zfunc = gpuGetZFunc;
-	
-	bool gpuGetZWriteEnable() nothrow @nogc @safe =>
-		(gpuState.write & StateWrite.z) != 0;
-	alias gpu_get_zwriteenable = gpuGetZWriteEnable;
 }
+alias gpu_get_zfunc = gpuGetZFunc;
+
+bool gpuGetZWriteEnable() nothrow @nogc @safe =>
+	(gpuState.write & StateWrite.z) != 0;
+alias gpu_get_zwriteenable = gpuGetZWriteEnable;
 
 float gpuGetDepth() nothrow @nogc @safe =>
 	gpuState.depth;
@@ -69,38 +69,36 @@ alias gpu_get_depth = gpuGetDepth;
 
 //TODO: gpu_get_fog?
 
-version(Have_bindbc_bgfx){
-	Cull gpuGetCullMode() nothrow @nogc @safe{
-		with(StateCull) switch(gpuState.culling){
-			case 0:             return Cull.noCulling;
-			case StateCull.cw:  return Cull.clockwise;
-			case StateCull.acw: return Cull.counterClockwise;
-			default: assert(0);
-		}
+Cull gpuGetCullMode() nothrow @nogc @safe{
+	with(StateCull) switch(gpuState.culling){
+		case 0:             return Cull.noCulling;
+		case StateCull.cw:  return Cull.clockwise;
+		case StateCull.acw: return Cull.counterClockwise;
+		default: assert(0);
 	}
-	alias gpu_get_cullmode = gpuGetCullMode;
-	
-	//TODO: gpu_get_blendmode. What happens if using an extended blend mode?
-	//TODO: gpu_get_blendmode_ext
-	//TODO: gpu_get_blendmode_ext_sepalpha
-	//TODO: gpu_get_blendmode_src
-	//TODO: gpu_get_blendmode_dest
-	//TODO: gpu_get_blendmode_srcalpha
-	//TODO: gpu_get_blendmode_destalpha
-	
-	bool[4] gpuGetColourWriteEnable() nothrow @nogc @safe => [
-		(gpuState.write & StateWrite.r) != 0,
-		(gpuState.write & StateWrite.g) != 0,
-		(gpuState.write & StateWrite.b) != 0,
-		(gpuState.write & StateWrite.a) != 0,
-	];
-	alias gpu_get_colourwriteenable = gpuGetColourWriteEnable;
-	
-	//TODO: gpu_get_texfilter
-	//TODO: gpu_get_texfilter_ext
-	//TODO: gpu_get_texrepeat
-	//TODO: gpu_get_texrepeat_ext
 }
+alias gpu_get_cullmode = gpuGetCullMode;
+
+//TODO: gpu_get_blendmode. What happens if using an extended blend mode?
+//TODO: gpu_get_blendmode_ext
+//TODO: gpu_get_blendmode_ext_sepalpha
+//TODO: gpu_get_blendmode_src
+//TODO: gpu_get_blendmode_dest
+//TODO: gpu_get_blendmode_srcalpha
+//TODO: gpu_get_blendmode_destalpha
+
+bool[4] gpuGetColourWriteEnable() nothrow @nogc @safe => [
+	(gpuState.write & StateWrite.r) != 0,
+	(gpuState.write & StateWrite.g) != 0,
+	(gpuState.write & StateWrite.b) != 0,
+	(gpuState.write & StateWrite.a) != 0,
+];
+alias gpu_get_colourwriteenable = gpuGetColourWriteEnable;
+
+//TODO: gpu_get_texfilter
+//TODO: gpu_get_texfilter_ext
+//TODO: gpu_get_texrepeat
+//TODO: gpu_get_texrepeat_ext
 
 bool gpuGetAlphaTestEnable() nothrow @nogc @safe =>
 	gpuState.alphaTest;

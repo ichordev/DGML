@@ -9,6 +9,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 enum C{
 	aqua     = 0xFF_FF_00,
 	black    = 0x00_00_00,

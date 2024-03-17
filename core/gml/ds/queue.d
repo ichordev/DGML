@@ -7,6 +7,10 @@ void init(){
 	
 }
 
+void quit(){
+	
+}
+
 struct DSQueue{
 	Variant[] data;
 	alias data this;
