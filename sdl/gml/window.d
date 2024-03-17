@@ -21,8 +21,11 @@ SDL_Window* window;
 
 ///Returns `false` if the program should exit.
 bool processEvents(){
-	//gml.input.keyboard.resetPressed();
+	resetKeyStates();
+	keyboardLastKey = keyboardKey;
 	//gml.input.mouse.resetPressed();
+	
+	auto oldMB = mouseButton;
 	
 	SDL_Event event;
 	while(SDL_PollEvent(&event)){
@@ -37,15 +40,39 @@ bool processEvents(){
 				break;
 			case SDL_KEYDOWN:
 				if(event.key.repeat != 0) break;
-				//gml.input.keyboard.setPressed(cast(Key)event.key.keysym.scancode);
+				gml.input.keyboard.setPressed(event.key.keysym.sym);
+				VirtualKeyConstant vkKey;
+				if(getVKCode(event.key.keysym.sym, vkKey)){
+					keyboardKey = vkKey;
+				}
+				break;
+			case SDL_KEYUP:
+				gml.input.keyboard.setReleased(event.key.keysym.sym);
+				VirtualKeyConstant vkKey;
+				if(getVKCode(event.key.keysym.sym, vkKey)){
+					if(vkKey == keyboardKey){
+						keyboardKey = -1;
+					}
+				}
 				break;
 			case SDL_MOUSEBUTTONDOWN:
-				//gml.input.mouse.setPressed(event.button.button);
+				gml.input.mouse.setPressed(event.button.button);
+				mouseButton = SDL_BUTTON(event.button.button);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				gml.input.mouse.setReleased(event.button.button);
+				if(mouseButton == SDL_BUTTON(event.button.button)){
+					mouseButton = MB.none;
+				}
 				break;
 			case SDL_QUIT:
 				return false;
 			default:
 		}
+	}
+	
+	if(oldMB != mouseButton){
+		mouseLastButton = oldMB;
 	}
 	
 	return true;

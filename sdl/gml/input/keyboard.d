@@ -2,11 +2,27 @@ module gml.input.keyboard;
 
 import bindbc.sdl;
 
-void init(){
+void init() @safe{
+	int keyCount;
+	keysHeld = () @trusted{
+		static assert(bool.sizeof == ubyte.sizeof); //so that we can implicitly convert `Uint8*` from `SDL_GetKeyboardState` into a bool array
+		auto raw = SDL_GetKeyboardState(&keyCount);
+		return (cast(const(bool)*)raw)[0..keyCount];
+	}();
+	keysPressed = null;
+	keysPressed.length = keyCount;
+	keysReleased = null;
+	keysReleased.length = keyCount;
 	
+	keyboardKey = -1;
+	keyboardLastKey = -1;
 }
 
-alias VirtualKeyConstant = uint;
+const(bool)[] keysHeld;
+bool[] keysPressed;
+bool[] keysReleased;
+
+alias VirtualKeyConstant = int;
 
 enum VK: VirtualKeyConstant{
 	noKey       = 0,   ///keycode representing that no key is pressed
@@ -153,3 +169,149 @@ SDL_Keycode getSDLKeycode(VirtualKeyConstant code) nothrow @nogc pure @safe{
 		default: return SDLK_UNKNOWN;
 	}
 }
+///Returns `false` if there's no equivalent VK code.
+bool getVKCode(SDL_Keycode code, out VirtualKeyConstant key) nothrow @nogc pure @safe{
+	switch(code){
+		case SDLK_UNKNOWN:            key = VK.noKey; break;
+		case keycodeSpecialMask | 0:  key = VK.anyKey; break;
+		case SDLK_LEFT:               key = VK.left; break;
+		case SDLK_RIGHT:              key = VK.right; break;
+		case SDLK_UP:                 key = VK.up; break;
+		case SDLK_DOWN:               key = VK.down; break;
+		case SDLK_RETURN:             key = VK.enter; break;
+		case SDLK_ESCAPE:             key = VK.escape; break;
+		case SDLK_SPACE:              key = VK.space; break;
+		case keycodeSpecialMask | 1:  key = VK.shift; break;
+		case keycodeSpecialMask | 2:  key = VK.control; break;
+		case keycodeSpecialMask | 3:  key = VK.alt; break;
+		case SDLK_BACKSPACE:          key = VK.backspace; break;
+		case SDLK_TAB:                key = VK.tab; break;
+		case SDLK_HOME:               key = VK.home; break;
+		case SDLK_END:                key = VK.end; break;
+		case SDLK_DELETE:             key = VK.delete_; break;
+		case SDLK_INSERT:             key = VK.insert; break;
+		case SDLK_PAGEUP:             key = VK.pageup; break;
+		case SDLK_PAGEDOWN:           key = VK.pagedown; break;
+		case SDLK_PAUSE:              key = VK.pause; break;
+		case SDLK_PRINTSCREEN:        key = VK.printScreen; break;
+		case SDLK_F1:                 key = VK.f1; break;
+		case SDLK_F2:                 key = VK.f2; break;
+		case SDLK_F3:                 key = VK.f3; break;
+		case SDLK_F4:                 key = VK.f4; break;
+		case SDLK_F5:                 key = VK.f5; break;
+		case SDLK_F6:                 key = VK.f6; break;
+		case SDLK_F7:                 key = VK.f7; break;
+		case SDLK_F8:                 key = VK.f8; break;
+		case SDLK_F9:                 key = VK.f9; break;
+		case SDLK_F10:                key = VK.f10; break;
+		case SDLK_F11:                key = VK.f11; break;
+		case SDLK_F12:                key = VK.f12; break;
+		case SDLK_KP_0:               key = VK.numpad0; break;
+		case SDLK_KP_1:               key = VK.numpad1; break;
+		case SDLK_KP_2:               key = VK.numpad2; break;
+		case SDLK_KP_3:               key = VK.numpad3; break;
+		case SDLK_KP_4:               key = VK.numpad4; break;
+		case SDLK_KP_5:               key = VK.numpad5; break;
+		case SDLK_KP_6:               key = VK.numpad6; break;
+		case SDLK_KP_7:               key = VK.numpad7; break;
+		case SDLK_KP_8:               key = VK.numpad8; break;
+		case SDLK_KP_9:               key = VK.numpad9; break;
+		case SDLK_KP_MEMMULTIPLY:     key = VK.multiply; break;
+		case SDLK_KP_MEMDIVIDE:       key = VK.divide; break;
+		case SDLK_KP_MEMADD:          key = VK.add; break;
+		case SDLK_KP_MEMSUBTRACT:     key = VK.subtract; break;
+		case SDLK_KP_DECIMAL:         key = VK.decimal; break;
+		case SDLK_LSHIFT:             key = VK.lShift; break;
+		case SDLK_LCTRL:              key = VK.lControl; break;
+		case SDLK_LALT:               key = VK.lAlt; break;
+		case SDLK_RSHIFT:             key = VK.rShift; break;
+		case SDLK_RCTRL:              key = VK.rControl; break;
+		case SDLK_RALT:               key = VK.rAlt; break;
+		case SDLK_a: key = 'A'; break; case SDLK_b: key = 'B'; break; case SDLK_c: key = 'C'; break;
+		case SDLK_d: key = 'D'; break; case SDLK_e: key = 'E'; break; case SDLK_f: key = 'F'; break;
+		case SDLK_g: key = 'G'; break; case SDLK_h: key = 'H'; break; case SDLK_i: key = 'I'; break;
+		case SDLK_j: key = 'J'; break; case SDLK_k: key = 'K'; break; case SDLK_l: key = 'L'; break;
+		case SDLK_m: key = 'M'; break; case SDLK_n: key = 'N'; break; case SDLK_o: key = 'O'; break;
+		case SDLK_p: key = 'P'; break; case SDLK_q: key = 'Q'; break; case SDLK_r: key = 'R'; break;
+		case SDLK_s: key = 'S'; break; case SDLK_t: key = 'T'; break; case SDLK_u: key = 'U'; break;
+		case SDLK_v: key = 'V'; break; case SDLK_w: key = 'W'; break; case SDLK_x: key = 'X'; break;
+		case SDLK_y: key = 'Y'; break; case SDLK_z: key = 'Z'; break; case SDLK_0: key = '0'; break;
+		case SDLK_1: key = '1'; break; case SDLK_2: key = '2'; break; case SDLK_3: key = '3'; break;
+		case SDLK_4: key = '4'; break; case SDLK_5: key = '5'; break; case SDLK_6: key = '6'; break;
+		case SDLK_7: key = '7'; break; case SDLK_8: key = '8'; break; case SDLK_9: key = '9'; break;
+		default: return false;
+	}
+	return true;
+}
+
+void setPressed(SDL_Keycode val) nothrow @nogc @safe{
+	keysPressed[val] = true;
+}
+void setReleased(SDL_Keycode val) nothrow @nogc @safe{
+	keysReleased[val] = true;
+}
+void resetKeyStates() nothrow @nogc @safe{
+	keysPressed[] = false;
+	keysReleased[] = false;
+}
+
+//General
+
+void ioClear() nothrow @nogc{
+	SDL_ResetKeyboard();
+	resetKeyStates();
+}
+alias io_clear = ioClear;
+
+bool keyboardCheck(VirtualKeyConstant key) nothrow @nogc @safe =>
+	keysHeld[getSDLKeycode(key)];
+alias keyboard_check = keyboardCheck;
+
+bool keyboardCheckPressed(VirtualKeyConstant key) nothrow @nogc @safe =>
+	keysPressed[getSDLKeycode(key)];
+alias keyboard_check_pressed = keyboardCheckPressed;
+
+bool keyboardCheckReleased(VirtualKeyConstant key) nothrow @nogc @safe =>
+	keysReleased[getSDLKeycode(key)];
+alias keyboard_check_released = keyboardCheckReleased;
+
+//TODO: keyboard_clear
+
+//TODO: keyboard_set_map
+
+//TODO: keyboard_get_map
+
+//TODO: keyboard_unset_map
+
+void keyboardSetNumlock(bool value) nothrow @nogc{
+	auto mods = SDL_GetModState();
+	if(value){
+		mods |= KMOD_NUM;
+	}else{
+		mods &= KMOD_NUM;
+	}
+	SDL_SetModState(mods);
+}
+alias keyboard_set_numlock = keyboardSetNumlock;
+
+bool keyboardGetNumlock() nothrow @nogc =>
+	(SDL_GetModState() & KMOD_NUM) != 0;
+alias keyboard_get_numlock = keyboardGetNumlock;
+
+//Simulating Keypresses
+
+//TODO: keyboard_key_press
+
+//TODO: keyboard_key_release
+
+//Keyboard State & Input
+
+VirtualKeyConstant keyboardKey;
+alias keyboard_key = keyboardKey;
+
+VirtualKeyConstant keyboardLastKey;
+alias keyboard_lastkey = keyboardLastKey;
+
+//TODO: keyboard_lastchar
+
+//TODO: keyboard_string

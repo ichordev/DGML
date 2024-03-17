@@ -3,7 +3,7 @@ module gml.room;
 import ic.vec;
 
 void init(){
-	
+	room = orderedRooms[0];
 }
 
 Room[] orderedRooms;

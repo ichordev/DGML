@@ -3,16 +3,13 @@ module gml.audio;
 import std.algorithm.comparison, std.exception, std.math, std.string;
 
 void init(){
-	version(Have_bindbc_sdl){
-		static if(bindSDLMixer){
-			SDL_InitSubSystem(SDL_INIT_AUDIO);
-			enum mixInitFlags = MIX_INIT_FLAC | MIX_INIT_MP3 | MIX_INIT_OGG;
-			enforce(Mix_Init(mixInitFlags) == mixInitFlags, format("SDL_mixer failed to initialise: %s", SDL_GetError().fromStringz()));
-		}
+	static if(bindSDLMixer){
+		SDL_InitSubSystem(SDL_INIT_AUDIO);
+		enum mixInitFlags = MIX_INIT_FLAC | MIX_INIT_MP3 | MIX_INIT_OGG;
+		enforce(Mix_Init(mixInitFlags) == mixInitFlags, format("SDL_mixer failed to initialise: %s", SDL_GetError().fromStringz()));
 	}
 }
 
-version(Have_bindbc_sdl):
 import bindbc.sdl;
 static if(bindSDLMixer):
 
