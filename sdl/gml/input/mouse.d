@@ -73,16 +73,18 @@ MouseButtonConstant mouseLastButton;
 @property double mouseX() nothrow @nogc @trusted{
 	int x;
 	SDL_GetMouseState(&x, null);
-	return (x - room.viewports[0].pos.x) / room.viewports[0].size.x;
+	return (x - room.viewports[0].pos.x) / room.viewports[0].size.x; //TODO: account for all viewports
 }
 alias mouse_x = mouseX;
 
 @property double mouseY() nothrow @nogc @trusted{
 	int y;
 	SDL_GetMouseState(null, &y);
-	return (y - room.viewports[0].pos.y) / room.viewports[0].size.y;
+	return (y - room.viewports[0].pos.y) / room.viewports[0].size.y; //TODO: account for all viewports
 }
 alias mouse_y = mouseY;
+
+//Window Functions
 
 int windowMouseGetX() nothrow @nogc @trusted{
 	int x;
@@ -102,3 +104,23 @@ void windowMouseSet(int x, int y) nothrow @nogc{
 	SDL_WarpMouseInWindow(window, x, y);
 }
 alias window_mouse_set = windowMouseSet;
+
+double windowViewMouseGetX(uint id) nothrow @nogc @trusted{
+	int x;
+	SDL_GetMouseState(&x, null);
+	return (x - room.viewports[id].pos.x) / room.viewports[id].size.x;
+}
+alias window_view_mouse_get_x = windowViewMouseGetX;
+
+double windowViewMouseGetY(uint id) nothrow @nogc @trusted{
+	int y;
+	SDL_GetMouseState(null, &y);
+	return (y - room.viewports[id].pos.y) / room.viewports[id].size.y;
+}
+alias window_view_mouse_get_y = windowViewMouseGetY;
+
+double windowViewsMouseGetX() nothrow @nogc @safe => mouseX;
+alias window_views_mouse_get_x = windowViewsMouseGetX;
+
+double windowViewsMouseGetY() nothrow @nogc @safe => mouseY;
+alias window_views_mouse_get_y = windowViewsMouseGetY;
