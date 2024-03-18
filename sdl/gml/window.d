@@ -18,7 +18,6 @@ void init(){
 	windowFocused = true;
 	windowColour = 0x00_00_00;
 	borderlessFullscreen = false;
-	isFullscreen = false;
 }
 
 void quit(){
@@ -29,7 +28,6 @@ SDL_Window* window;
 bool windowFocused;
 uint windowColour;
 bool borderlessFullscreen;
-bool isFullscreen;
 
 ///Returns `false` if the program should exit.
 bool processEvents(){
@@ -196,8 +194,8 @@ void windowCentre() nothrow @nogc{
 }
 alias window_center = windowCentre;
 
-bool windowGetFullscreen() nothrow @nogc @safe =>
-	isFullscreen;
+bool windowGetFullscreen() nothrow @nogc =>
+	(SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0;
 alias window_get_fullscreen = windowGetFullscreen;
 
 int windowGetWidth() nothrow @nogc{
@@ -232,7 +230,6 @@ alias window_get_y = windowGetY;
 
 void windowSetFullscreen(bool full) nothrow @nogc{
 	SDL_SetWindowFullscreen(window, full ? (borderlessFullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0);
-	isFullscreen = full;
 }
 alias window_set_fullscreen = windowSetFullscreen;
 

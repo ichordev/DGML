@@ -1,0 +1,53 @@
+{
+	"name": "de-gml-example-shapes",
+	"description": "Some shapes.",
+	"authors": ["Aya Partridge"],
+	"license": "LGPL-3.0-or-later",
+	
+	"dependencies": {
+		"bindbc-sdl": ">=1.3.0",
+		"bindbc-bgfx": ">=1.0.0",
+		"shelper": "~>1.0.0",
+		"ichor": "~>0.1.0",
+		"de-gml": "~>0.1.0",
+	},
+	"subConfigurations": {
+		"bindbc-sdl": "static",
+		"bindbc-bgfx": "static",
+	},
+	"versions": [
+		"SDL_2_24", "SDL_Mixer_202",
+	],
+	"libs": [
+		"SDL2",
+		"SDL2_mixer",
+		"stdc++",
+	],
+	"libs-linux": [
+		"glx",
+		"x11",
+	],
+	"lflags-osx": [
+		"-framework", "CoreFoundation",
+		"-framework", "Foundation",
+		"-framework", "QuartzCore",
+		"-framework", "AppKit",
+		"-framework", "IOKit",
+		"-framework", "Metal",
+	],
+	"preBuildCommands-linux": ["bash ../compileShaders.sh linux spirv"],
+	"preBuildCommands-osx": ["bash ../compileShaders.sh osx metal"],
+	"preBuildCommands-windows": ["bash ../compileShaders.sh windows s_3_0"],
+	
+	"targetType": "executable",
+	
+	"configurations": {
+		"bgfxDebug": {
+			"libs": ["bxDebug", "bimgDebug", "bgfxDebug"],
+		},
+		"bgfxRelease": {
+			"libs": ["bxRelease", "bimgRelease", "bgfxRelease"],
+		},
+	},
+	
+}

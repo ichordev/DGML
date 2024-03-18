@@ -1,0 +1,6 @@
+temp/
+*.log
+trace.def
+de-gml-example-shapes
+de-gml-example-shapes-*
+*.exe
