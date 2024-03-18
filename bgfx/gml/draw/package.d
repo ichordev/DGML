@@ -9,7 +9,7 @@ public import
 import gml.display, gml.game, gml.room, gml.window;
 
 import core.time, core.thread;
-import std.exception, std.format, std.math, std.string;
+import std.algorithm.comparison, std.exception, std.format, std.math, std.string;
 import ic.vec;
 static import shelper;
 import bindbc.sdl, bindbc.bgfx;
@@ -167,13 +167,19 @@ struct GPUState{
 	}
 	
 	void setUpView() nothrow @nogc{
+		int winW, winH;
+		SDL_GetWindowSize(window, &winW, &winH);
+		
+		int width  = min(room.width, winW);
+		int height = min(room.height, winH);
+		
 		if(room.views){
 			//TODO: this
 		}else{
-			bgfx.setViewRect(view, 0, 0, cast(ushort)room.width, cast(ushort)room.height);
+			bgfx.setViewRect(view, 0, 0, cast(ushort)width, cast(ushort)height);
 		}
 		
-		const projMat = Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(room.width, room.height), -16000f,16000f, bgfx.getCaps().homogeneousDepth);
+		const projMat = Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(width, height), -16000f,16000f, bgfx.getCaps().homogeneousDepth);
 		bgfx.setViewTransform(view, null, &projMat);
 		
 		bgfx.touch(view);

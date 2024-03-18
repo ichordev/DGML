@@ -20,7 +20,8 @@ enum C{
 	blue     = 0xFF_00_00,
 	dkGrey   = 0x40_40_40,
 	fuchsia  = 0xFF_00_FF,
-	gray     = 0x80_80_80,
+	grey     = 0x80_80_80,
+	gray     = grey,
 	green    = 0x00_80_00,
 	lime     = 0x00_FF_00,
 	ltGrey   = 0xC0_C0_C0,
@@ -37,7 +38,7 @@ enum C{
 }
 alias c = C;
 
-///Translates 0xRRGGBB into 0xBBGGRR so it can be used in the functions below.
+///Reverses a colour's bytes, so that you can plug `col(0xRRGGBB)` into the functions below.
 uint col(uint bgr) nothrow @nogc pure @safe =>
 	((bgr & 0xFF) << 16) | (bgr & 0xFF_00) | ((bgr & 0xFF_00_00) >> 16);
 
@@ -162,13 +163,13 @@ alias merge_colour = mergeColour;
 //Set the various different options for drawing to the screen
 
 void drawClear(uint col) nothrow @nogc{
-	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, col);
+	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, (.col(col) << 8) | 0xFF);
 	gpuState.nextView();
 }
 alias draw_clear = drawClear;
 
 void drawClearAlpha(uint col, float alpha) nothrow @nogc{
-	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, (cast(uint)round(alpha * 255f) << 24) | (col & 0x00_FF_FF_FF));
+	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, (.col(col) << 8) | cast(ubyte)round(alpha * 255f));
 	gpuState.nextView();
 }
 alias draw_clear_alpha = drawClearAlpha;
