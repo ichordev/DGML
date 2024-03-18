@@ -6,11 +6,70 @@ public import
 	gml.draw.gpu,
 	gml.draw.texture;
 
-import std.math;
+import gml.display, gml.game, gml.room, gml.window;
+
+import core.time, core.thread;
+import std.exception, std.format, std.math, std.string;
 import ic.vec;
-import bindbc.bgfx;
+import bindbc.sdl, bindbc.bgfx;
 
 void init(){
+	SDL_SysWMinfo wmi;
+	SDL_GetVersion(&wmi.version_);
+	enforce(SDL_GetWindowWMInfo(window, &wmi), "SDL failed to get window WM info: %s".format(SDL_GetError().fromStringz()));
+	
+	auto bgfxInit = bgfx.Init(0);
+	
+	bgfxInit.resolution.width = room.width;
+	bgfxInit.resolution.height = room.height;
+	bgfxInit.resolution.reset = bgfxResetFlags;
+	
+	switch(wmi.subsystem){
+		version(linux){
+			case SDL_SYSWM_X11:
+				bgfxInit.platformData.nwh = cast(void*)wmi.info.x11.window;
+				bgfxInit.platformData.ndt = wmi.info.x11.display;
+				bgfxInit.type = RendererType.vulkan;
+				break;
+			case SDL_SYSWM_WAYLAND:
+				bgfxInit.platformData.nwh = SDL_GetWindowData(window, "wl_egl_window");
+				bgfxInit.platformData.ndt = wmi.info.wl.display;
+				bgfxInit.type = RendererType.vulkan;
+				break;
+		}
+		version(OSX){
+			case SDL_SYSWM_COCOA:
+				SDL_MetalView view = SDL_Metal_CreateView(window);
+				bgfxInit.platformData.nwh = SDL_Metal_GetLayer(view);
+				bgfxInit.type = RendererType.metal;
+				break;
+		}
+		version(iOS){
+			case SDL_SYSWM_UIKIT:
+				bgfxInit.platformData.nwh = wmi.info.uikit.window;
+				bgfxInit.type = RendererType.metal;
+				break;
+		}
+		version(Android){
+			case SDL_SYSWM_ANDROID:
+				bgfxInit.platformData.nwh = wmi.info.android.window;
+				bgfxInit.type = RendererType.vulkan;
+				break;
+		}
+		version(Windows){
+			case SDL_SYSWM_WINDOWS:
+				bgfxInit.platformData.nwh = wmi.info.win.window;
+				bgfxInit.type = RendererType.direct3D11;
+				break;
+		}
+		default:
+			enforce(0, "Your windowing sub-system is not supported on this platform.");
+	}
+	enforce(bgfx.init(bgfxInit), "bgfx failed to initialise");
+	
+	prevFrameTime = MonoTime.zero();
+	gpuState = GPUState.init;
+	
 	VertPos.init();
 	VertPosCol.init();
 	VertPosColTex.init();
@@ -26,6 +85,33 @@ void quit(){
 	gml.draw.gpu.quit();
 	gml.draw.forms.quit();
 	gml.draw.colour.quit();
+}
+
+MonoTime prevFrameTime;
+
+void startFrame(){
+	if(prevFrameTime == MonoTime.zero()){
+		prevFrameTime = MonoTime.currTime;
+	}
+	gpuState.view = 0;
+	gpuState.setUpView();
+}
+
+void endFrame(){
+	bgfx.frame();
+	
+	auto now = MonoTime.currTime;
+	Duration waitFor = (prevFrameTime + frameDelay) - now;
+	
+	while(waitFor > msecs(3)){
+		Thread.sleep(waitFor - msecs(3));
+		
+		now = MonoTime.currTime;
+		waitFor = (prevFrameTime + frameDelay) - now;
+	}
+	const addNewPrevFrameTime = prevFrameTime + frameDelay;
+	const nowNewPrevFrameTime = MonoTime.currTime;
+	prevFrameTime = addNewPrevFrameTime.ticks > nowNewPrevFrameTime.ticks ? addNewPrevFrameTime : nowNewPrevFrameTime;
 }
 
 struct GPUState{
@@ -60,6 +146,20 @@ struct GPUState{
 	ulong alphaRef = (() @trusted => toStateAlphaRef(0))();
 	
 	bgfx.ViewID view = 0;
+	
+	void nextView() nothrow @nogc{
+		view++;
+		setUpView();
+	}
+	
+	void setUpView() nothrow @nogc{
+		if(room.views){
+			//TODO: this
+		}else{
+			bgfx.setViewRect(view, 0, 0, cast(ushort)room.width, cast(ushort)room.height);
+		}
+		bgfx.touch(view);
+	}
 	
 	bgfx.ProgramHandle program;
 }

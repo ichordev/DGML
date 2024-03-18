@@ -456,7 +456,7 @@ alias dot_product_normalised = dotProductNormalised;
 F angleDifference(F)(F x, F y) nothrow @nogc pure @safe
 if(__traits(isFloating, F)){
 	F mod(F a, F n) => a - floor(a / n) * n;
-	return mod((y - x) + 180.0, 360.0) - 180.0;
+	return mod((y - x) + F(180), F(360)) - F(180);
 }
 alias angle_difference = angleDifference;
 

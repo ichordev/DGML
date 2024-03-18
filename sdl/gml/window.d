@@ -8,10 +8,10 @@ import bindbc.sdl;
 void init(){
 	enforce(SDL_InitSubSystem(SDL_INIT_VIDEO) == 0, "SDL failed to initialise video: %s".format(SDL_GetError().fromStringz()));
 	
-	window = SDL_CreateWindow("Isladventure",
+	window = SDL_CreateWindow("",
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
-		orderedRooms[0].width, orderedRooms[0].height,
+		room.width, room.height,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
 	);
 	enforce(window !is null, "SDL window creation error: %s".format(SDL_GetError().fromStringz()));
@@ -27,7 +27,7 @@ SDL_Window* window;
 bool processEvents(){
 	resetKeyStates();
 	keyboardLastKey = keyboardKey;
-	//gml.input.mouse.resetPressed();
+	resetMouseStates();
 	
 	auto oldMB = mouseButton;
 	

@@ -4,6 +4,7 @@ import gml.draw;
 
 import std.algorithm.comparison, std.math;
 import ic.ease: lerp;
+import bindbc.bgfx;
 
 void init(){
 	
@@ -36,7 +37,7 @@ enum C{
 }
 alias c = C;
 
-///A helper function that translates 0xBBGGRR into RRGGBB.
+///Translates 0xRRGGBB into 0xBBGGRR so it can be used in the functions below.
 uint col(uint bgr) nothrow @nogc pure @safe =>
 	((bgr & 0xFF) << 16) | (bgr & 0xFF_00) | ((bgr & 0xFF_00_00) >> 16);
 
@@ -160,19 +161,17 @@ alias merge_colour = mergeColour;
 
 //Set the various different options for drawing to the screen
 
-version(Have_bindbc_bgfx){
-	import bindbc.bgfx;
-	
-	void drawClear(uint col) nothrow @nogc{
-		bgfx.setViewClear(++gpuState.view, Clear.colour | Clear.depth, col);
-	}
-	alias draw_clear = drawClear;
-	
-	void drawClearAlpha(uint col, float alpha) nothrow @nogc{
-		bgfx.setViewClear(++gpuState.view, Clear.colour | Clear.depth, (cast(uint)round(alpha * 255f) << 24) | (col & 0x00_FF_FF_FF));
-	}
-	alias draw_clear_alpha = drawClearAlpha;
+void drawClear(uint col) nothrow @nogc{
+	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, col);
+	gpuState.nextView();
 }
+alias draw_clear = drawClear;
+
+void drawClearAlpha(uint col, float alpha) nothrow @nogc{
+	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, (cast(uint)round(alpha * 255f) << 24) | (col & 0x00_FF_FF_FF));
+	gpuState.nextView();
+}
+alias draw_clear_alpha = drawClearAlpha;
 
 void drawSetAlpha(float alpha) nothrow @nogc @safe{
 	gpuState.col[3] = clamp(alpha, 0f, 1f);

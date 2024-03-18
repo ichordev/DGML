@@ -4,7 +4,8 @@ import core.time;
 import std.math;
 
 void init(){
-	
+	gameState = GameState.starting;
+	frameDelay = 1.usecs / 30;
 }
 
 void quit(){
@@ -17,7 +18,7 @@ enum GameState{
 	ending,
 	restarting,
 }
-GameState gameState = GameState.starting;
+GameState gameState;
 int returnCode = 0;
 
 void gameEnd(int returnCode=0) nothrow @nogc @safe{
@@ -37,7 +38,7 @@ enum GameSpeed{
 }
 alias gamespeed = GameSpeed;
 
-Duration frameDelay = 1.usecs / 30;
+Duration frameDelay;
 
 void gameSetSpeed(ulong speed, GameSpeed type) nothrow @nogc @safe{
 	frameDelay = {

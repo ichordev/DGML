@@ -249,10 +249,10 @@ bool getVKCode(SDL_Keycode code, out VirtualKeyConstant key) nothrow @nogc pure 
 }
 
 void setPressed(SDL_Keycode val) nothrow @nogc @safe{
-	keysPressed[val] = true;
+	keysPressed[val & ~SDLK_SCANCODE_MASK] = true;
 }
 void setReleased(SDL_Keycode val) nothrow @nogc @safe{
-	keysReleased[val] = true;
+	keysReleased[val & ~SDLK_SCANCODE_MASK] = true;
 }
 void resetKeyStates() nothrow @nogc @safe{
 	keysPressed[] = false;
