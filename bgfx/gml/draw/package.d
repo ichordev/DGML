@@ -11,6 +11,7 @@ import gml.display, gml.game, gml.room, gml.window;
 import core.time, core.thread;
 import std.exception, std.format, std.math, std.string;
 import ic.vec;
+static import shelper;
 import bindbc.sdl, bindbc.bgfx;
 
 void init(){
@@ -67,8 +68,13 @@ void init(){
 	}
 	enforce(bgfx.init(bgfxInit), "bgfx failed to initialise");
 	
+	u_colour = bgfx.createUniform("u_colour", UniformType.vec4, 1);
+	shPassPos       = shelper.load("passPos",       "uniformCol");
+	shPassPosCol    = shelper.load("passPosCol",    "passCol");
+	
 	prevFrameTime = MonoTime.zero();
 	gpuState = GPUState.init;
+	gpuState.program = shPassPos;
 	
 	VertPos.init();
 	VertPosCol.init();
@@ -85,7 +91,15 @@ void quit(){
 	gml.draw.gpu.quit();
 	gml.draw.forms.quit();
 	gml.draw.colour.quit();
+	
+	shelper.unloadAllShaderPrograms();
+	bgfx.destroy(u_colour);
+	
+	bgfx.shutdown();
 }
+
+bgfx.ProgramHandle shPassPos, shPassPosCol;
+bgfx.UniformHandle u_colour;
 
 MonoTime prevFrameTime;
 
@@ -158,6 +172,10 @@ struct GPUState{
 		}else{
 			bgfx.setViewRect(view, 0, 0, cast(ushort)room.width, cast(ushort)room.height);
 		}
+		
+		const projMat = Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(room.width, room.height), -16000f,16000f, bgfx.getCaps().homogeneousDepth);
+		bgfx.setViewTransform(view, null, &projMat);
+		
 		bgfx.touch(view);
 	}
 	

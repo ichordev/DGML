@@ -9,12 +9,16 @@ void init(){
 	enforce(SDL_InitSubSystem(SDL_INIT_VIDEO) == 0, "SDL failed to initialise video: %s".format(SDL_GetError().fromStringz()));
 	
 	window = SDL_CreateWindow("",
-		SDL_WINDOWPOS_UNDEFINED,
-		SDL_WINDOWPOS_UNDEFINED,
+		SDL_WINDOWPOS_CENTRED,
+		SDL_WINDOWPOS_CENTRED,
 		room.width, room.height,
 		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
 	);
 	enforce(window !is null, "SDL window creation error: %s".format(SDL_GetError().fromStringz()));
+	windowFocused = true;
+	windowColour = 0x00_00_00;
+	borderlessFullscreen = false;
+	isFullscreen = false;
 }
 
 void quit(){
@@ -22,6 +26,10 @@ void quit(){
 }
 
 SDL_Window* window;
+bool windowFocused;
+uint windowColour;
+bool borderlessFullscreen;
+bool isFullscreen;
 
 ///Returns `false` if the program should exit.
 bool processEvents(){
@@ -36,6 +44,12 @@ bool processEvents(){
 		switch(event.type){
 			case SDL_WINDOWEVENT:
 				switch(event.window.event){
+					case SDL_WINDOWEVENT_FOCUS_GAINED:
+						windowFocused = true;
+						break;
+					case SDL_WINDOWEVENT_FOCUS_LOST:
+						windowFocused = false;
+						break;
 					case SDL_WINDOWEVENT_SIZE_CHANGED:
 						//onWindowResize(event.window.data1, event.window.data2);
 						break;
@@ -115,55 +129,154 @@ void* windowHandle() nothrow @nogc{
 }
 alias window_handle = windowHandle;
 
-//TODO: window_has_focus
+bool windowHasFocus() nothrow @nogc @safe =>
+	windowFocused;
+alias window_has_focus = windowHasFocus;
 
 //Mouse & Cursor
 
-//TODO: window_mouse_get_x
-//TODO: window_mouse_get_y
-//TODO: window_mouse_get_delta_x
-//TODO: window_mouse_get_delta_y
-//TODO: window_mouse_set
-//TODO: window_view_mouse_get_x
-//TODO: window_view_mouse_get_y
-//TODO: window_views_mouse_get_x
-//TODO: window_views_mouse_get_y
 //TODO: window_set_cursor
 //TODO: window_get_cursor
 
 //Mouse Lock
 
-//TODO: window_mouse_set_locked
-//TODO: window_mouse_get_locked
+void windowMouseSetLocked(bool enable) nothrow @nogc{
+	SDL_SetRelativeMouseMode(enable);
+}
+alias window_mouse_set_locked = windowMouseSetLocked;
+
+bool windowMouseGetLocked() nothrow @nogc =>
+	SDL_GetRelativeMouseMode() == SDL_TRUE;
+alias window_mouse_get_locked = windowMouseGetLocked;
 
 //Drawing
 
-//TODO: window_set_colour
-//TODO: window_get_colour
+void windowSetColour(uint colour) nothrow @nogc @safe{
+	windowColour = colour;
+}
+alias window_set_colour = windowSetColour;
+
+uint windowGetColour() nothrow @nogc @safe =>
+	windowColour;
+alias window_get_colour = windowGetColour;
 
 //Border & Caption
 
-//TODO: window_set_caption
-//TODO: window_get_caption
-//TODO: window_set_showborder
-//TODO: window_get_showborder
-//TODO: window_enable_borderless_fullscreen
-//TODO: window_get_borderless_fullscreen
+void windowSetCaption(string caption) nothrow{
+	SDL_SetWindowTitle(window, caption.toStringz());
+}
+alias window_set_caption = windowSetCaption;
+
+const(char)[] windowGetCaption() nothrow @nogc =>
+	SDL_GetWindowTitle(window).fromStringz();
+alias window_get_caption = windowGetCaption;
+
+void windowSetShowBorder(bool show) nothrow @nogc{
+	SDL_SetWindowBordered(window, show);
+}
+alias window_set_showborder = windowSetShowBorder;
+
+bool windowGetShowBorder() nothrow @nogc =>
+	(SDL_GetWindowFlags(window) & SDL_WINDOW_BORDERLESS) != 0;
+alias window_get_showborder = windowGetShowBorder;
+
+void windowEnableBorderlessFullscreen(bool enable) nothrow @nogc @safe{
+	borderlessFullscreen = enable;
+}
+alias window_enable_borderless_fullscreen = windowEnableBorderlessFullscreen;
+
+bool windowGetBorderlessFullscreen() nothrow @nogc @safe =>
+	borderlessFullscreen;
+alias window_get_borderless_fullscreen = windowGetBorderlessFullscreen;
 
 //Dimensions & Position
 
-//TODO: window_center
-//TODO: window_get_fullscreen
-//TODO: window_get_width
-//TODO: window_get_height
-//TODO: window_get_x
-//TODO: window_get_y
+void windowCentre() nothrow @nogc{
+	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTRED, SDL_WINDOWPOS_CENTRED);
+}
+alias window_center = windowCentre;
+
+bool windowGetFullscreen() nothrow @nogc @safe =>
+	isFullscreen;
+alias window_get_fullscreen = windowGetFullscreen;
+
+int windowGetWidth() nothrow @nogc{
+	int w;
+	SDL_GetWindowSize(window, &w, null);
+	return w;
+}
+alias window_get_width = windowGetWidth;
+
+int windowGetHeight() nothrow @nogc{
+	int h;
+	SDL_GetWindowSize(window, null, &h);
+	return h;
+}
+alias window_get_height = windowGetHeight;
+
+int windowGetX() nothrow @nogc{
+	int x;
+	SDL_GetWindowPosition(window, &x, null);
+	return x;
+}
+alias window_get_x = windowGetX;
+
+int windowGetY() nothrow @nogc{
+	int y;
+	SDL_GetWindowPosition(window, null, &y);
+	return y;
+}
+alias window_get_y = windowGetY;
+
 //TODO: window_get_visible_rects
-//TODO: window_set_fullscreen
-//TODO: window_set_position
-//TODO: window_set_size
-//TODO: window_set_rectangle
-//TODO: window_set_min_width
-//TODO: window_set_max_width
-//TODO: window_set_min_height
-//TODO: window_set_max_height
+
+void windowSetFullscreen(bool full) nothrow @nogc{
+	SDL_SetWindowFullscreen(window, full ? (borderlessFullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : SDL_WINDOW_FULLSCREEN) : 0);
+	isFullscreen = full;
+}
+alias window_set_fullscreen = windowSetFullscreen;
+
+void windowSetPosition(uint x, uint y) nothrow @nogc{
+	SDL_SetWindowPosition(window, x, y);
+}
+alias window_set_position = windowSetPosition;
+
+void windowSetSize(int w, int h) nothrow @nogc{
+	SDL_SetWindowSize(window, w, h);
+}
+alias window_set_size = windowSetSize;
+
+void windowSetRectangle(uint x, uint y, int w, int h) nothrow @nogc{
+	windowSetPosition(x, y);
+	windowSetSize(w, h);
+}
+alias window_set_rectangle = windowSetRectangle;
+
+void windowSetMinWidth(int width) nothrow @nogc{
+	int height;
+	SDL_GetWindowMinimumSize(window, null, &height);
+	SDL_SetWindowMinimumSize(window, width, height);
+}
+alias window_set_min_width = windowSetMinWidth;
+
+void windowSetMaxWidth(int width) nothrow @nogc{
+	int height;
+	SDL_GetWindowMaximumSize(window, null, &height);
+	SDL_SetWindowMaximumSize(window, width, height);
+}
+alias window_set_max_width = windowSetMaxWidth;
+
+void windowSetMinHeight(int height) nothrow @nogc{
+	int width;
+	SDL_GetWindowMinimumSize(window, &width, null);
+	SDL_SetWindowMinimumSize(window, width, height);
+}
+alias window_set_min_height = windowSetMinHeight;
+
+void windowSetMaxHeight(int height) nothrow @nogc{
+	int width;
+	SDL_GetWindowMaximumSize(window, &width, null);
+	SDL_SetWindowMaximumSize(window, width, height);
+	
+}
+alias window_set_max_height = windowSetMaxHeight;

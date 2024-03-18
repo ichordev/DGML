@@ -17,6 +17,8 @@ alias MouseButtonConstant = uint;
 MouseButtonConstant mousePressed;
 MouseButtonConstant mouseReleased;
 float scrolling;
+int absMouseX, absMouseY;
+int relMouseX, relMouseY;
 
 enum MB: MouseButtonConstant{
 	left    = SDL_BUTTON(SDL_BUTTON_LEFT),    ///The left mouse button
@@ -41,6 +43,8 @@ void resetMouseStates() nothrow @nogc @safe{
 	mousePressed = MB.none;
 	mouseReleased = MB.none;
 	scrolling = 0f;
+	relMouseX = 0;
+	relMouseY = 0;
 	mouseButton = MB.none;
 	mouseLastButton = MB.none;
 }
@@ -70,35 +74,33 @@ MouseButtonConstant mouseLastButton;
 
 //TODO: mouse_wheel_down
 
-@property double mouseX() nothrow @nogc @trusted{
-	int x;
-	SDL_GetMouseState(&x, null);
-	return (x - room.viewports[0].pos.x) / room.viewports[0].size.x; //TODO: account for all viewports
+@property double mouseX() nothrow @nogc @safe{
+	return (absMouseX - room.viewports[0].pos.x) / room.viewports[0].size.x; //TODO: account for all viewports
 }
 alias mouse_x = mouseX;
 
-@property double mouseY() nothrow @nogc @trusted{
-	int y;
-	SDL_GetMouseState(null, &y);
-	return (y - room.viewports[0].pos.y) / room.viewports[0].size.y; //TODO: account for all viewports
+@property double mouseY() nothrow @nogc @safe{
+	return (absMouseY - room.viewports[0].pos.y) / room.viewports[0].size.y; //TODO: account for all viewports
 }
 alias mouse_y = mouseY;
 
 //Window Functions
 
-int windowMouseGetX() nothrow @nogc @trusted{
-	int x;
-	SDL_GetMouseState(&x, null);
-	return x;
-}
+int windowMouseGetX() nothrow @nogc @safe =>
+	absMouseX;
 alias window_mouse_get_x = windowMouseGetX;
 
-int windowMouseGetY() nothrow @nogc @trusted{
-	int y;
-	SDL_GetMouseState(null, &y);
-	return y;
-}
+int windowMouseGetY() nothrow @nogc @safe =>
+	absMouseY;
 alias window_mouse_get_y = windowMouseGetY;
+
+int windowMouseGetDeltaX() nothrow @nogc @safe =>
+	relMouseX;
+alias window_mouse_get_delta_x = windowMouseGetDeltaX;
+
+int windowMouseGetDeltaY() nothrow @nogc @safe =>
+	relMouseY;
+alias window_mouse_get_delta_y = windowMouseGetDeltaY;
 
 void windowMouseSet(int x, int y) nothrow @nogc{
 	SDL_WarpMouseInWindow(window, x, y);

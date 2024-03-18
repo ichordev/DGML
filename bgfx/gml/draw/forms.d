@@ -13,29 +13,26 @@ void quit(){
 	
 }
 
-version(Have_bindbc_bgfx):
 import bindbc.bgfx;
 
-bgfx.UniformHandle u_col;
-
-void drawVerts(VertPos[] verts, StatePT state=cast(StatePT)0){
+void drawVerts(VertPos[] verts, StatePT state=cast(StatePT)0) nothrow{
 	const vertNum = bgfx.getAvailTransientVertexBuffer(cast(uint)verts.length, VertPos.layout);
 	if(vertNum == 0) return;
 	bgfx.TransientVertexBuffer buffer;
 	bgfx.allocTransientVertexBuffer(&buffer, vertNum, VertPos.layout);
 	
-	bgfx.setUniform(u_col, &gpuState.col);
+	bgfx.setUniform(u_colour, &gpuState.col);
 	
 	auto bufferData = (cast(VertPos*)buffer.data)[0..vertNum];
 	foreach(i, vert; verts[0..vertNum]){
 		bufferData[i] = vert;
 	}
 	bgfx.setVertexBuffer(0, &buffer);
-	bgfx.setState(gpuState.getBgfxState());
+	bgfx.setState(gpuState.getBgfxState() | state);
 	bgfx.submit(gpuState.view, gpuState.program);
 }
 
-void drawVerts(VertPosCol[] verts, StatePT state=cast(StatePT)0){
+void drawVerts(VertPosCol[] verts, StatePT state=cast(StatePT)0) nothrow{
 	const vertNum = bgfx.getAvailTransientVertexBuffer(cast(uint)verts.length, VertPosCol.layout);
 	if(vertNum == 0) return;
 	TransientVertexBuffer buffer;
@@ -46,11 +43,11 @@ void drawVerts(VertPosCol[] verts, StatePT state=cast(StatePT)0){
 		bufferData[i] = vert;
 	}
 	bgfx.setVertexBuffer(0, &buffer);
-	bgfx.setState(gpuState.getBgfxState());
-	bgfx.submit(gpuState.view, gpuState.program);
+	bgfx.setState(gpuState.getBgfxState() | state);
+	bgfx.submit(gpuState.view, shPassPosCol);
 }
 
-void drawVerts(VertPosColTex[] verts, StatePT state=cast(StatePT)0){
+void drawVerts(VertPosColTex[] verts, StatePT state=cast(StatePT)0) nothrow{
 	const vertNum = bgfx.getAvailTransientVertexBuffer(cast(uint)verts.length, VertPosColTex.layout);
 	if(vertNum == 0 || vertNum > verts.length) return;
 	
@@ -62,11 +59,11 @@ void drawVerts(VertPosColTex[] verts, StatePT state=cast(StatePT)0){
 		bufferData[i] = vert;
 	}
 	bgfx.setVertexBuffer(0, &buffer);
-	bgfx.setState(gpuState.getBgfxState());
+	bgfx.setState(gpuState.getBgfxState() | state);
 	bgfx.submit(gpuState.view, gpuState.program);
 }
 
-void drawCircle(float x, float y, float radius, bool outline){
+void drawCircle(float x, float y, float radius, bool outline) nothrow{
 	VertPos[] verts;
 	if(outline){
 		verts.length = circlePrecision+1;
@@ -96,7 +93,7 @@ void drawCircle(float x, float y, float radius, bool outline){
 }
 alias draw_circle = drawCircle;
 
-void drawCircleColour(float x, float y, float radius, uint col1, uint col2, bool outline){
+void drawCircleColour(float x, float y, float radius, uint col1, uint col2, bool outline) nothrow{
 	VertPosCol[] verts;
 	if(outline){
 		verts.length = circlePrecision+1;
@@ -127,20 +124,20 @@ void drawCircleColour(float x, float y, float radius, uint col1, uint col2, bool
 alias draw_circle_colour = drawCircleColour;
 
 
-void drawPoint(float x, float y){
-	drawVerts([VertPos(x, y)]);
+void drawPoint(float x, float y) nothrow{
+	drawVerts([VertPos(x, y)], StatePT.points);
 }
 alias draw_point = drawPoint;
 
-void drawLine(float x1, float y1, float x2, float y2){
+void drawLine(float x1, float y1, float x2, float y2) nothrow{
 	drawVerts([
 		VertPos(x1, y1),
 		VertPos(x2, y2),
-	]);
+	], StatePT.lines);
 }
 alias draw_line = drawLine;
 
-void drawRectangle(float x1, float y1, float x2, float y2, bool outline){
+void drawRectangle(float x1, float y1, float x2, float y2, bool outline) nothrow{
 	if(outline){
 		drawVerts([
 			VertPos(x1, y1),
@@ -160,7 +157,7 @@ void drawRectangle(float x1, float y1, float x2, float y2, bool outline){
 }
 alias draw_rectangle = drawRectangle;
 
-void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, bool outline){
+void drawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, bool outline) nothrow{
 	if(outline){
 		drawVerts([
 			VertPos(x1, y1),
@@ -182,7 +179,7 @@ alias draw_triangle = drawTriangle;
 // | NOTE: most of the following code code assumes x/y1 is top left. Please rewrite it where this does not hold true. |
 // '------------------------------------------------------------------------------------------------------------------'
 
-void drawArrow(float x1, float y1, float x2, float y2, float size){
+void drawArrow(float x1, float y1, float x2, float y2, float size) nothrow{
 	const dir = atan2(y1-y2, x1-x2);
 	drawLine(x1, y1, x2, y2);
 	drawTriangle(
@@ -197,7 +194,7 @@ void drawArrow(float x1, float y1, float x2, float y2, float size){
 }
 alias draw_arrow = drawArrow;
 
-void drawButton(float x1, float y1, float x2, float y2, bool up){
+void drawButton(float x1, float y1, float x2, float y2, bool up) nothrow{
 	enum margin = 2f;
 	const stateAlpha = gpuState.intCol & 0xFF_00_00_00;
 	const col1 = (up ? C.ltGrey : C.dkGrey) | stateAlpha;
@@ -246,8 +243,7 @@ void drawButton(float x1, float y1, float x2, float y2, bool up){
 	]);
 }
 
-
-void drawEllipse(float x1, float y1, float x2, float y2, bool outline){
+void drawEllipse(float x1, float y1, float x2, float y2, bool outline) nothrow{
 	//TODO: outline :P
 	const rad = Vec2!float(
 		(x2-x1) / 2f,
@@ -275,7 +271,7 @@ void drawEllipse(float x1, float y1, float x2, float y2, bool outline){
 }
 alias draw_ellipse = drawEllipse;
 
-void drawEllipseColour(float x1, float y1, float x2, float y2, uint col1, uint col2, bool outline){
+void drawEllipseColour(float x1, float y1, float x2, float y2, uint col1, uint col2, bool outline) nothrow{
 	//TODO: outline :P
 	const rad = Vec2!float(
 		(x2-x1) / 2f,
@@ -303,7 +299,7 @@ void drawEllipseColour(float x1, float y1, float x2, float y2, uint col1, uint c
 }
 alias draw_ellipse_colour = drawEllipseColour;
 
-void drawLineWidth(float x1, float y1, float x2, float y2, float w){
+void drawLineWidth(float x1, float y1, float x2, float y2, float w) nothrow{
 	const dir = atan2(y1-y2, x1-x2);
 	drawVerts([
 		VertPos(x1 + cos(dir+pi2)*w, y1 + sin(dir+pi2)*w),
@@ -314,7 +310,7 @@ void drawLineWidth(float x1, float y1, float x2, float y2, float w){
 	], StatePT.triStrip);
 }
 
-void drawLineWidthColour(float x1, float y1, float x2, float y2, float w, uint col1, uint col2){
+void drawLineWidthColour(float x1, float y1, float x2, float y2, float w, uint col1, uint col2) nothrow{
 	const dir = atan2(y1-y2, x1-x2);
 	drawVerts([
 		VertPosCol(x1 + cos(dir+pi2)*w, y1 + sin(dir+pi2)*w, col1),

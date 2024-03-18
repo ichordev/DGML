@@ -40,6 +40,7 @@
 				"de-gml:core": "*",
 				"de-gml:sdl": "*",
 				"bindbc-bgfx": ">=1.0.0",
+				"shelper": ">=1.0.0",
 			},
 			"targetPath": "lib",
 			"targetName": "De-GML-bgfx",
