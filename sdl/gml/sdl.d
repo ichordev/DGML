@@ -5,7 +5,7 @@ public import
 	gml.input,
 	gml.window;
 
-import gml.room;
+import gml.camera, gml.room;
 
 /**
 Before calling this function:
@@ -13,6 +13,7 @@ Before calling this function:
 - You must've declared at least one room.
 */
 void init(){
+	gml.camera.init();
 	gml.room.init();
 	gml.window.init();
 	gml.audio.init();
@@ -24,4 +25,5 @@ void quit(){
 	gml.audio.quit();
 	gml.window.quit();
 	gml.room.quit();
+	gml.camera.quit();
 }

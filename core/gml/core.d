@@ -1,10 +1,12 @@
 module gml.core;
 
 public import
+	gml.camera,
 	gml.collision,
 	gml.ds,
 	gml.game,
 	gml.maths,
+	gml.options,
 	gml.room;
 
 void init(){

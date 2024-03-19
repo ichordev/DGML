@@ -1,18 +1,29 @@
 module gml.window;
 
-import gml.input, gml.room;
+import gml.input, gml.options, gml.room;
 
 import std.exception, std.string;
+import ic.vec;
 import bindbc.sdl;
 
 void init(){
 	enforce(SDL_InitSubSystem(SDL_INIT_VIDEO) == 0, "SDL failed to initialise video: %s".format(SDL_GetError().fromStringz()));
 	
-	window = SDL_CreateWindow("",
+	windowSize = room.windowSize;
+	prevWindowSize = windowSize;
+	window = SDL_CreateWindow(
+		options.displayName.toStringz(),
 		SDL_WINDOWPOS_CENTRED,
 		SDL_WINDOWPOS_CENTRED,
-		room.width, room.height,
-		SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE,
+		windowSize.x,
+		windowSize.y,
+		(
+			SDL_WINDOW_SHOWN
+			| (options.startFullscreen ? SDL_WINDOW_FULLSCREEN : 0)
+			| (options.allowWindowResize ? SDL_WINDOW_RESIZABLE : 0)
+			| (options.borderlessWindow ? SDL_WINDOW_BORDERLESS : 0)
+			| (options.enableHighDPI ? SDL_WINDOW_ALLOW_HIGHDPI : 0)
+		),
 	);
 	enforce(window !is null, "SDL window creation error: %s".format(SDL_GetError().fromStringz()));
 	windowFocused = true;
@@ -24,6 +35,8 @@ void quit(){
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
+Vec2!uint windowSize;
+Vec2!uint prevWindowSize;
 SDL_Window* window;
 bool windowFocused;
 uint windowColour;
@@ -35,6 +48,7 @@ bool processEvents(){
 	keyboardLastKey = keyboardKey;
 	resetMouseStates();
 	
+	prevWindowSize = windowSize;
 	auto oldMB = mouseButton;
 	
 	SDL_Event event;
@@ -49,7 +63,10 @@ bool processEvents(){
 						windowFocused = false;
 						break;
 					case SDL_WINDOWEVENT_SIZE_CHANGED:
-						//onWindowResize(event.window.data1, event.window.data2);
+						windowSize = Vec2!uint(
+							event.window.data1,
+							event.window.data2,
+						);
 						break;
 					default:
 				}
@@ -150,7 +167,7 @@ alias window_mouse_get_locked = windowMouseGetLocked;
 //Drawing
 
 void windowSetColour(uint colour) nothrow @nogc @safe{
-	windowColour = colour;
+	windowColour = ((colour & 0xFF) << 24) | ((colour & 0xFF_00) << 8) | ((colour & 0xFF_00_00) >> 8) | 0xFF;
 }
 alias window_set_colour = windowSetColour;
 

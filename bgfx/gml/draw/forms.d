@@ -29,7 +29,7 @@ void drawVerts(VertPos[] verts, StatePT state=cast(StatePT)0) nothrow{
 	}
 	bgfx.setVertexBuffer(0, &buffer);
 	bgfx.setState(gpuState.getBgfxState() | state);
-	bgfx.submit(gpuState.view, gpuState.program);
+	bgfx.submit(gpuState.bgfxView, gpuState.program);
 }
 
 void drawVerts(VertPosCol[] verts, StatePT state=cast(StatePT)0) nothrow{
@@ -44,7 +44,7 @@ void drawVerts(VertPosCol[] verts, StatePT state=cast(StatePT)0) nothrow{
 	}
 	bgfx.setVertexBuffer(0, &buffer);
 	bgfx.setState(gpuState.getBgfxState() | state);
-	bgfx.submit(gpuState.view, shPassPosCol);
+	bgfx.submit(gpuState.bgfxView, shPassPosCol);
 }
 
 void drawVerts(VertPosColTex[] verts, StatePT state=cast(StatePT)0) nothrow{
@@ -60,7 +60,7 @@ void drawVerts(VertPosColTex[] verts, StatePT state=cast(StatePT)0) nothrow{
 	}
 	bgfx.setVertexBuffer(0, &buffer);
 	bgfx.setState(gpuState.getBgfxState() | state);
-	bgfx.submit(gpuState.view, gpuState.program);
+	bgfx.submit(gpuState.bgfxView, gpuState.program);
 }
 
 void drawCircle(float x, float y, float radius, bool outline) nothrow{

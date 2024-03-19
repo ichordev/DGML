@@ -1,10 +1,12 @@
 module gml.display;
 
+import gml.options;
+
 import bindbc.bgfx;
 
 void init(){
 	timingMode = TM.countVSyncs;
-	vsync = false;
+	vsync = options.useVSync;
 	msaaLevel = 0;
 }
 

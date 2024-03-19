@@ -163,14 +163,14 @@ alias merge_colour = mergeColour;
 //Set the various different options for drawing to the screen
 
 void drawClear(uint col) nothrow @nogc{
-	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, (.col(col) << 8) | 0xFF);
-	gpuState.nextView();
+	gpuState.nextBgfxView();
+	bgfx.setViewClear(gpuState.bgfxView, Clear.colour | Clear.depth, (.col(col) << 8) | 0xFF);
 }
 alias draw_clear = drawClear;
 
 void drawClearAlpha(uint col, float alpha) nothrow @nogc{
-	bgfx.setViewClear(gpuState.view, Clear.colour | Clear.depth, (.col(col) << 8) | cast(ubyte)round(alpha * 255f));
-	gpuState.nextView();
+	gpuState.nextBgfxView();
+	bgfx.setViewClear(gpuState.bgfxView, Clear.colour | Clear.depth, (.col(col) << 8) | cast(ubyte)round(alpha * 255f));
 }
 alias draw_clear_alpha = drawClearAlpha;
 

@@ -1,9 +1,13 @@
 module gml.room;
 
+import gml.camera;
+
+import std.algorithm.comparison;
 import ic.vec;
 
 void init(){
-	room = orderedRooms[0];
+	roomInd = 0;
+	roomStart();
 }
 
 void quit(){
@@ -12,19 +16,37 @@ void quit(){
 
 Room[] orderedRooms;
 Room room;
-
-//when room starts: copy orderedRoom into room
-
-struct Viewport{
-	bool visible = false;
-	Vec2!float pos;
-	Vec2!float size;
-}
+size_t roomInd;
 
 struct Room{
-	uint width = 800;
-	uint height = 600;
+	Vec2!uint size = Vec2!uint(800, 600);
 	bool persistent = false;
-	bool views = false;
+	bool useViews = false;
 	Viewport[8] viewports;
+	
+	@property Vec2!uint windowSize(){
+		if(useViews){
+			auto minPos = Vec2!uint(uint.max, uint.max);
+			Vec2!uint maxPos;
+			foreach(viewport; viewports){
+				if(viewport.visible){
+					const portMaxPos = viewport.pos + viewport.size;
+					minPos.x = min(minPos.x, viewport.pos.x);
+					minPos.y = min(minPos.y, viewport.pos.y);
+					maxPos.x = max(maxPos.x, portMaxPos.x);
+					maxPos.y = max(maxPos.y, portMaxPos.y);
+				}
+			}
+			import std;
+			writeln("min: ",minPos);
+			writeln("max: ",maxPos);
+			return maxPos - minPos;
+		}else{
+			return size;
+		}
+	}
+}
+
+void roomStart(){
+	room = orderedRooms[roomInd];
 }
