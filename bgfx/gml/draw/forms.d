@@ -1,6 +1,6 @@
 module gml.draw.forms;
 
-import gml.draw;
+import gml.camera, gml.draw;
 
 import std.algorithm.comparison, std.math;
 import ic.calc, ic.vec;
@@ -29,6 +29,8 @@ void drawVerts(VertPos[] verts, StatePT state=cast(StatePT)0) nothrow{
 	}
 	bgfx.setVertexBuffer(0, &buffer);
 	bgfx.setState(gpuState.getBgfxState() | state);
+	const transform = gpuState.getTransform();
+	bgfx.setTransform(&transform);
 	bgfx.submit(gpuState.bgfxView, gpuState.program);
 }
 
@@ -44,6 +46,8 @@ void drawVerts(VertPosCol[] verts, StatePT state=cast(StatePT)0) nothrow{
 	}
 	bgfx.setVertexBuffer(0, &buffer);
 	bgfx.setState(gpuState.getBgfxState() | state);
+	const transform = gpuState.getTransform();
+	bgfx.setTransform(&transform);
 	bgfx.submit(gpuState.bgfxView, shPassPosCol);
 }
 
@@ -60,6 +64,8 @@ void drawVerts(VertPosColTex[] verts, StatePT state=cast(StatePT)0) nothrow{
 	}
 	bgfx.setVertexBuffer(0, &buffer);
 	bgfx.setState(gpuState.getBgfxState() | state);
+	const transform = gpuState.getTransform();
+	bgfx.setTransform(&transform);
 	bgfx.submit(gpuState.bgfxView, gpuState.program);
 }
 

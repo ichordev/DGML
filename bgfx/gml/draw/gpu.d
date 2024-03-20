@@ -71,9 +71,9 @@ alias gpu_get_depth = gpuGetDepth;
 
 Cull gpuGetCullMode() nothrow @nogc @safe{
 	with(StateCull) switch(gpuState.culling){
-		case 0:             return Cull.noCulling;
-		case StateCull.cw:  return Cull.clockwise;
-		case StateCull.acw: return Cull.counterClockwise;
+		case 0:   return Cull.noCulling;
+		case cw:  return Cull.clockwise;
+		case acw: return Cull.counterClockwise;
 		default: assert(0);
 	}
 }
@@ -107,12 +107,55 @@ alias gpu_get_alphatestenable = gpuGetAlphaTestEnable;
 //Setters
 
 //TODO: gpu_set_blendenable
-//TODO: gpu_set_ztestenable
-//TODO: gpu_set_zfunc
-//TODO: gpu_set_zwriteenable
-//TODO: gpu_set_depth
+
+void gpuSetZTestEnable(bool enable) nothrow @nogc @safe{
+	gpuState.zTest = enable;
+}
+alias gpu_set_ztestenable = gpuSetZTestEnable;
+
+void gpuSetZFunc(CmpFunc cmpFunc) nothrow @nogc @safe{
+	gpuState.zFunc = {
+		with(CmpFunc) final switch(cmpFunc){
+			case CmpFunc.less:          return StateDepthTest.less;
+			case CmpFunc.lessEqual:     return StateDepthTest.lEqual;
+			case CmpFunc.equal:         return StateDepthTest.equal;
+			case CmpFunc.greaterEqual:  return StateDepthTest.gEqual;
+			case CmpFunc.greater:       return StateDepthTest.greater;
+			case CmpFunc.notEqual:      return StateDepthTest.notEqual;
+			case CmpFunc.never:         return StateDepthTest.never;
+			case CmpFunc.always:        return StateDepthTest.always;
+		}
+	}();
+}
+alias gpu_set_zfunc = gpuSetZFunc;
+
+void gpuSetZWriteEnable(bool enable) nothrow @nogc @safe{
+	if(enable){
+		gpuState.write |= StateWrite.z;
+	}else{
+		gpuState.write &= ~StateWrite.z;
+	}
+}
+alias gpu_set_zwriteenable = gpuSetZWriteEnable;
+
+void gpuSetDepth(float depth) nothrow @nogc @safe{
+	gpuState.depth = depth;
+} 
+alias gpu_set_depth = gpuSetDepth;
+
 //TODO: gpu_set_fog
-//TODO: gpu_set_cullmode
+
+void gpuSetCullMode(Cull cullMode) nothrow @nogc @safe{
+	gpuState.culling = {
+		with(Cull) final switch(cullMode){
+			case noCulling:         return cast(StateCull)0;
+			case clockwise:         return StateCull.cw;
+			case counterClockwise:  return StateCull.acw;
+		}
+	}();
+}
+alias gpu_set_cullmode = gpuSetCullMode;
+
 //TODO: gpu_set_blendmode
 //TODO: gpu_set_blendmode_ext
 //TODO: gpu_set_blendmode_ext_sepalpha

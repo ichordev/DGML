@@ -1,11 +1,14 @@
 module gml.game;
 
+import gml.options;
+
 import core.time;
 import std.math;
+import ic.calc;
 
 void init(){
 	gameState = GameState.starting;
-	frameDelay = 1.usecs / 30;
+	gameSetSpeed(options.fps, GameSpeed.fps);
 }
 
 void quit(){
@@ -33,30 +36,40 @@ void gameRestart() nothrow @nogc @safe{
 
 enum GameSpeed{
 	fps,
-	microSeconds,
-	microseconds = microSeconds,
+	microseconds,
 }
 alias gamespeed = GameSpeed;
 
 Duration frameDelay;
 
-void gameSetSpeed(ulong speed, GameSpeed type) nothrow @nogc @safe{
+void gameSetSpeed(double speed, GameSpeed type) nothrow @nogc @safe{
 	frameDelay = {
 		final switch(type){
-			case GameSpeed.fps:          return 1.usecs / speed;
-			case GameSpeed.microSeconds: return speed.usecs;
+			case GameSpeed.fps:          return 100_000.seconds / cast(ulong)round(speed * 100_000.0);
+			case GameSpeed.microseconds: return nsecs(cast(ulong)round(speed * cast(double)1.usecs.total!"nsecs"()));
 		}
 	}();
 }
 alias game_set_speed = gameSetSpeed;
 
-ulong gameGetSpeed(GameSpeed type) nothrow @nogc @safe{
+double gameGetSpeed(GameSpeed type) nothrow @nogc @safe{
 	final switch(type){
-		case GameSpeed.fps:          return cast(ulong)round(1.usecs.total!"usecs"() / cast(double)frameDelay.total!"usecs"());
-		case GameSpeed.microSeconds: return frameDelay.total!"usecs"();
+		case GameSpeed.fps:          return 1.seconds.total!"nsecs"() / cast(double)frameDelay.total!"nsecs"();
+		case GameSpeed.microseconds: return frameDelay.total!"nsecs"() / cast(double)(1.usecs.total!"nsecs"());
 	}
 }
 alias game_get_speed = gameGetSpeed;
+unittest{
+	gameSetSpeed(60.0, GameSpeed.fps);
+	assert(gameGetSpeed(GameSpeed.fps).eqEps(60.0, 0.001));
+	assert(gameGetSpeed(GameSpeed.microseconds).eqEps(16_666.6, 0.01));
+	gameSetSpeed(16_666, GameSpeed.microseconds);
+	assert(gameGetSpeed(GameSpeed.fps).eqEps(60.0, 0.0025));
+	assert(gameGetSpeed(GameSpeed.microseconds) == 16_666.0);
+	gameSetSpeed(59.94, GameSpeed.fps);
+	assert(gameGetSpeed(GameSpeed.fps).eqEps(59.94, 0.001));
+	assert(gameGetSpeed(GameSpeed.microseconds).eqEps(16_683.3, 0.01));
+}
 
 struct HighScore{
 	string name = "Unknown";

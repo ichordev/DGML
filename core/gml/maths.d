@@ -1,7 +1,9 @@
 module gml.maths;
 
+import gml.camera;
+
 import std.datetime, std.format, std.math, std.random;
-import ic.calc, ic.ease;
+import ic.calc, ic.ease, ic.vec;
 
 void init(){
 	
@@ -377,7 +379,7 @@ void randomise() nothrow @nogc @safe{
 
 alias lerp = ic.ease.lerp;
 
-//Angles And Distance 
+//Angles And Distance
 
 F dcos(F)(F val) nothrow @nogc pure @safe
 if(__traits(isFloating, F)) =>
@@ -469,3 +471,99 @@ F lengthDirY(F)(F len, F dir) nothrow @nogc pure @safe
 if(__traits(isFloating, F)) =>
 	dsin(dir) * len;
 alias lengthdir_y = lengthDirY;
+
+//Matrix Functions
+
+enum Matrix{
+	view,        ///The current view matrix
+	projection,  ///The current projection matrix
+	world,       ///The current world matrix
+}
+alias matrix = Matrix;
+
+Mat4 matrixGet(Matrix type) nothrow @nogc @safe{
+	final switch(type){
+		case Matrix.view:        return viewMat;
+		case Matrix.projection:  return projMat;
+		case Matrix.world:       return worldMat;
+	}
+}
+alias matrix_get = matrixGet;
+
+void matrixSet(Matrix type, Mat4 matrix) nothrow @nogc @safe{
+	final switch(type){
+		case Matrix.view:        viewMat  = matrix; break;
+		case Matrix.projection:  projMat  = matrix; break;
+		case Matrix.world:       worldMat = matrix; break;
+	}
+}
+alias matrix_set = matrixSet;
+
+Mat4 matrixBuild(
+	float x, float y, float z,
+	float xRotation, float yRotation, float zRotation,
+	float xScale, float yScale, float zScale,
+) nothrow @nogc pure @safe =>
+	Mat4.xyzRot(Vec3!float(xRotation, yRotation, zRotation))
+		.scale(Vec3!float(xScale, yScale, zScale))
+		.translate(Vec3!float(x, y, z));
+
+Mat4 matrixMultiply(Mat4 matrix1, Mat4 matrix2) nothrow @nogc pure @safe =>
+	matrix1 * matrix2;
+alias matrix_multiply = matrixMultiply;
+
+Mat4 matrixBuildIdentity() nothrow @nogc pure @safe =>
+	Mat4();
+alias matrix_build_identity = matrixBuildIdentity;
+
+Mat4 matrixBuildLookAt(
+	float xFrom, float yFrom, float zFrom,
+	float xTo, float yTo, float zTo,
+	float xUp, float yUp, float zUp,
+) nothrow @nogc pure @safe =>
+	Mat4.view(
+		Vec3!float(xFrom, yFrom, zFrom),
+		Vec3!float(xTo, yTo, zTo),
+		Vec3!float(xUp, yUp, zUp),
+	);
+alias matrix_build_lookat = matrixBuildLookAt;
+
+//TODO: matrix_transform_vertex
+
+enum matrixStackMax = 50;
+Mat4[matrixStackMax] matrixStack;
+size_t matrixStackInd = 0;
+
+bool matrixStackIsEmpty() nothrow @nogc @safe =>
+	matrixStackInd == 0;
+alias matrix_stack_is_empty = matrixStackIsEmpty;
+
+void matrixStackClear() nothrow @nogc @safe{
+	matrixStackInd = 0;
+}
+alias matrix_stack_clear = matrixStackClear;
+
+void matrixStackSet(Mat4 matrix) nothrow @nogc @safe{
+	if(matrixStackInd > 0){
+		matrixStack[matrixStackInd-1] = matrix;
+	}
+}
+alias matrix_stack_set = matrixStackSet;
+
+void matrixStackPush(Mat4 matrix) nothrow @nogc @safe{
+	if(matrixStackInd < matrixStackMax){
+		matrixStack[matrixStackInd++] = matrix;
+	}
+}
+alias matrix_stack_push = matrixStackPush;
+
+void matrixStackPop() nothrow @nogc @safe{
+	if(matrixStackInd > 0){
+		matrixStackInd--;
+	}
+}
+alias matrix_stack_pop = matrixStackPop;
+
+Mat4 matrixStackTop() nothrow @nogc @safe =>
+	matrixStackInd > 0 ? matrixStack[matrixStackInd-1] : Mat4();
+alias matrix_stack_top = matrixStackTop;

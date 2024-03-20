@@ -11,8 +11,10 @@ void init(){
 }
 
 void quit(){
-	Mix_Quit();
-	SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	static if(bindSDLMixer){
+		Mix_Quit();
+		SDL_QuitSubSystem(SDL_INIT_AUDIO);
+	}
 }
 
 import bindbc.sdl;

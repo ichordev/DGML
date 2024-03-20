@@ -20,6 +20,10 @@ Vec2!ushort viewportPos;
 Vec2!ushort viewportSize;
 Camera viewportCam;
 
+Mat4 viewMat;
+Mat4 projMat;
+Mat4 worldMat;
+
 class Camera{
 	Mat4 view;
 	Mat4 proj;

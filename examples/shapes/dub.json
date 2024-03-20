@@ -16,7 +16,7 @@
 		"bindbc-bgfx": "static",
 	},
 	"versions": [
-		"SDL_2_24", "SDL_Mixer_202",
+		"SDL_Mixer_202",
 	],
 	"libs": [
 		"SDL2",

@@ -26,6 +26,7 @@ struct Room{
 	
 	@property Vec2!uint windowSize(){
 		if(useViews){
+			//technically there should be a 'windowPos' variable, used to account for a `minPos` of >0, but GameMaker doesn't account for this at all!
 			auto minPos = Vec2!uint(uint.max, uint.max);
 			Vec2!uint maxPos;
 			foreach(viewport; viewports){
@@ -37,10 +38,11 @@ struct Room{
 					maxPos.y = max(maxPos.y, portMaxPos.y);
 				}
 			}
-			import std;
-			writeln("min: ",minPos);
-			writeln("max: ",maxPos);
-			return maxPos - minPos;
+			if(minPos == vec2(uint.max, uint.max)){
+				return size;
+			}else{
+				return maxPos - minPos;
+			}
 		}else{
 			return size;
 		}

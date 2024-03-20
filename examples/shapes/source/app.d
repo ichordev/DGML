@@ -2,7 +2,6 @@ module app;
 
 import std.file, std.math, std.path;
 import ic.calc, ic.vec;
-import bindbc.bgfx;
 import shelper;
 import gml;
 
@@ -13,9 +12,9 @@ void main(){
 	options.keepAspectRatio = true;
 	
 	auto myCam1 = cameraCreate();
-	cameraSetProjMat(myCam1, Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(100, 350), -16000f, 16000f, bgfx.getCaps().homogeneousDepth));
+	cameraSetProjMat(myCam1, matrixBuildProjectionOrtho(100, 350, -16000f, 16000f));
 	auto myCam2 = cameraCreate();
-	cameraSetProjMat(myCam2, Mat4.projOrtho(Vec2!float(50f, 50f), Vec2!float(750, 550), -16000f, 16000f, bgfx.getCaps().homogeneousDepth));
+	cameraSetProjMat(myCam2, matrixBuildProjectionOrtho(50, 50, 700, 500, -16000f, 16000f));
 	
 	gml.room.orderedRooms ~= Room(
 		Vec2!uint(800, 600),
@@ -33,7 +32,12 @@ void main(){
 				size: Vec2!ushort(100, 200),
 				camera: myCam2,
 			),
-			Viewport(), Viewport(),
+			Viewport(), 
+			Viewport(
+				visible: true,
+				pos: Vec2!ushort(360, 75),
+				size: Vec2!ushort(80, 60),
+			),
 			Viewport(), Viewport(),
 			Viewport(), Viewport(),
 		],
@@ -46,7 +50,7 @@ void main(){
 	while(processEvents()){
 		startFrame();
 		while(nextView()){
-			s += 0.001f;
+			s += 0.02f;
 			s %= pi*2f;
 			float x = sin(s)*0.5f + 0.5f;
 			float y = abs(cos(s));

@@ -29,6 +29,9 @@
 				"de-gml:core": "*",
 				"bindbc-sdl": ">=1.3.0",
 			},
+			"versions": [
+				"SDL_2_24",
+			],
 			"targetPath": "lib",
 			"targetName": "De-GML-SDL",
 		},

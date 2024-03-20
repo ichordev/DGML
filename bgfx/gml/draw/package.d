@@ -78,6 +78,7 @@ void init(){
 	
 	prevFrameTime = MonoTime.zero();
 	gpuState = GPUState.init;
+	gpuState.col[] = options.defaultDrawColour[];
 	gpuState.program = shPassPos;
 	
 	VertPos.init();
@@ -174,7 +175,7 @@ void startFrame(){
 	viewCurrent = 0;
 	viewNext = 0;
 	gpuState.bgfxView = 0;
-	gpuState.bgfxViewNext = 2;
+	gpuState.bgfxViewNext = 1;
 	
 	bgfx.setViewClear(gpuState.bgfxView, Clear.colour | Clear.depth, windowColour);
 	bgfx.setViewRect(gpuState.bgfxView, 0, 0, cast(ushort)windowSize.x, cast(ushort)windowSize.y);
@@ -217,6 +218,13 @@ bool nextView(){
 		viewNext = 1;
 	}
 	
+	if(viewportCam){
+		viewMat = viewportCam.view;
+		projMat = viewportCam.proj;
+	}else{
+		viewMat = Mat4.init;
+		projMat = Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(room.size.x, room.size.y), -16000f, 16000f, bgfx.getCaps().homogeneousDepth);
+	}
 	scaleToMasterViewport(viewportPos, viewportSize);
 	
 	gpuState.nextBgfxView();
@@ -249,10 +257,9 @@ struct GPUState{
 		cast(uint)round(col[2] * 255f) << 16 |
 		cast(uint)round(col[3] * 255f) << 24;
 	
-	Mat4 getTransform() nothrow @nogc pure @safe =>
-		transform.translate(Vec3!float(0f, 0f, depth));
+	Mat4 getTransform() nothrow @nogc @safe =>
+		worldMat.translate(Vec3!float(0f, 0f, depth));
 	
-	Mat4 transform;
 	float depth = 0f;
 	
 	bool zTest = false;
@@ -282,22 +289,14 @@ struct GPUState{
 	}
 	
 	void setUpBgfxView() nothrow @nogc{
-		if(viewportCam is null){
-			bgfx.setViewRect(
-				bgfxView,
-				viewportPos.x,
-				viewportPos.y,
-				viewportSize.x,
-				viewportSize.y,
-			);
-			
-			const projMat = Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(room.size.x, room.size.y), -16000f, 16000f, bgfx.getCaps().homogeneousDepth);
-			bgfx.setViewTransform(bgfxView, null, &projMat);
-		}else{
-			bgfx.setViewRect(bgfxView, viewportPos.x, viewportPos.y, viewportSize.x, viewportSize.y);
-			bgfx.setViewTransform(bgfxView, &viewportCam.view, &viewportCam.proj);
-		}
-		
+		bgfx.setViewRect(
+			bgfxView,
+			viewportPos.x,
+			viewportPos.y,
+			viewportSize.x,
+			viewportSize.y,
+		);
+		bgfx.setViewTransform(bgfxView, &viewMat, &projMat);
 		bgfx.touch(bgfxView);
 	}
 	
@@ -341,6 +340,21 @@ struct VertPosColTex{
 		.end();
 	}
 }
+
+Mat4 matrixBuildProjectionOrtho(float w, float h, float zNear, float zFar) nothrow @nogc =>
+	Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(w, h), zNear, zFar, bgfx.getCaps().homogeneousDepth);
+alias matrix_build_projection_ortho = matrixBuildProjectionOrtho;
+
+Mat4 matrixBuildProjectionOrtho(float x, float y, float w, float h, float zNear, float zFar) nothrow @nogc =>
+	Mat4.projOrtho(Vec2!float(x, y), Vec2!float(x+w, y+h), zNear, zFar, bgfx.getCaps().homogeneousDepth);
+
+Mat4 matrixBuildProjectionPerspective(float w, float h, float zNear, float zFar) nothrow @nogc =>
+	Mat4.projPersp(Vec2!float(0f, 0f), Vec2!float(w, h), zNear, zFar, bgfx.getCaps().homogeneousDepth);
+alias matrix_build_projection_perspective = matrixBuildProjectionPerspective;
+
+Mat4 matrixBuildProjectionPerspectiveFov(float fov, float aspect, float zNear, float zFar) nothrow @nogc =>
+	Mat4.projPersp(fov, aspect, zNear, zFar, bgfx.getCaps().homogeneousDepth);
+alias matrix_build_projection_perspective_fov = matrixBuildProjectionPerspectiveFov;
 
 void cameraApply(Camera cameraID) nothrow @nogc{
 	viewportCam = cameraID;
