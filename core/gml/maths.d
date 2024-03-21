@@ -528,7 +528,13 @@ Mat4 matrixBuildLookAt(
 	);
 alias matrix_build_lookat = matrixBuildLookAt;
 
-//TODO: matrix_transform_vertex
+double[3] matrixTransformVertex(Mat4 matrix, double x, double y, double z) nothrow @nogc pure @safe =>
+	cast(double[3])(matrix * Vec3!double(x, y, z));
+double[4] matrixTransformVertex(Mat4 matrix, double x, double y, double z, double w) nothrow @nogc pure @safe =>
+	cast(double[4])(matrix * Vec4!double(x, y, z, w));
+alias matrix_transform_vertex = matrixTransformVertex;
+
+//Matrix Stack Functions
 
 enum matrixStackMax = 50;
 Mat4[matrixStackMax] matrixStack;
