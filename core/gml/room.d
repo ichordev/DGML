@@ -15,14 +15,17 @@ void quit(){
 }
 
 Room[] orderedRooms;
-Room room;
+Room roomData;
 size_t roomInd;
 
 struct Room{
-	Vec2!uint size = Vec2!uint(800, 600);
+	Vec2!uint size = Vec2!uint(1366, 768);
 	bool persistent = false;
 	bool useViews = false;
-	Viewport[8] viewports;
+	enum viewCount = 8;
+	Viewport[viewCount] viewports;
+	
+	bool ordered = false;
 	
 	@property Vec2!uint windowSize(){
 		if(useViews){
@@ -49,6 +52,32 @@ struct Room{
 	}
 }
 
+alias RoomAsset = Room*;
+
 void roomStart(){
-	room = orderedRooms[roomInd];
+	//room = &orderedRooms[roomInd];
+	roomData = orderedRooms[roomInd];
+	roomData.ordered = false;
 }
+
+//Global
+
+@property RoomAsset roomFirst() nothrow @nogc @safe =>
+	&orderedRooms[0];
+alias room_first = roomFirst;
+
+alias roomHeight = roomData.size.y;
+alias room_height = roomHeight;
+
+//Information
+
+Room* roomAdd() nothrow pure @safe =>
+	new Room();
+alias room_add = roomAdd;
+
+Room* roomAddOrdered() nothrow @safe{
+	orderedRooms ~= Room();
+	return &orderedRooms[$-1];
+}
+
+

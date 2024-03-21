@@ -2,6 +2,7 @@ module gml.input.mouse;
 
 import gml.room, gml.window;
 
+import ic.vec;
 import bindbc.sdl;
 
 void init() @safe{
@@ -17,8 +18,8 @@ alias MouseButtonConstant = uint;
 MouseButtonConstant mousePressed;
 MouseButtonConstant mouseReleased;
 float scrolling;
-int absMouseX, absMouseY;
-int relMouseX, relMouseY;
+Vec2!int absMousePos;
+Vec2!int relMousePos;
 
 enum MB: MouseButtonConstant{
 	left    = SDL_BUTTON(SDL_BUTTON_LEFT),    ///The left mouse button
@@ -43,8 +44,10 @@ void resetMouseStates() nothrow @nogc @safe{
 	mousePressed = MB.none;
 	mouseReleased = MB.none;
 	scrolling = 0f;
-	relMouseX = 0;
-	relMouseY = 0;
+	relMousePos.x = 0;
+	relMousePos.y = 0;
+	mouseViewPosDirty = true;
+	mouseViewsPosDirty[] = true;
 	mouseButton = MB.none;
 	mouseLastButton = MB.none;
 }
@@ -74,55 +77,30 @@ MouseButtonConstant mouseLastButton;
 
 //TODO: mouse_wheel_down
 
-@property double mouseX() nothrow @nogc @safe{
-	return (absMouseX - room.viewports[0].pos.x) / room.viewports[0].size.x; //TODO: account for all viewports
-}
-alias mouse_x = mouseX;
-
-@property double mouseY() nothrow @nogc @safe{
-	return (absMouseY - room.viewports[0].pos.y) / room.viewports[0].size.y; //TODO: account for all viewports
-}
-alias mouse_y = mouseY;
+bool mouseViewPosDirty;
+Vec2!int mouseViewPos;
+bool[Room.viewCount] mouseViewsPosDirty;
+Vec2!int[Room.viewCount] mouseViewsPos;
 
 //Window Functions
 
 int windowMouseGetX() nothrow @nogc @safe =>
-	absMouseX;
+	absMousePos.x;
 alias window_mouse_get_x = windowMouseGetX;
 
 int windowMouseGetY() nothrow @nogc @safe =>
-	absMouseY;
+	absMousePos.y;
 alias window_mouse_get_y = windowMouseGetY;
 
 int windowMouseGetDeltaX() nothrow @nogc @safe =>
-	relMouseX;
+	relMousePos.x;
 alias window_mouse_get_delta_x = windowMouseGetDeltaX;
 
 int windowMouseGetDeltaY() nothrow @nogc @safe =>
-	relMouseY;
+	relMousePos.y;
 alias window_mouse_get_delta_y = windowMouseGetDeltaY;
 
 void windowMouseSet(int x, int y) nothrow @nogc{
 	SDL_WarpMouseInWindow(window, x, y);
 }
 alias window_mouse_set = windowMouseSet;
-
-double windowViewMouseGetX(uint id) nothrow @nogc @trusted{
-	int x;
-	SDL_GetMouseState(&x, null);
-	return (x - room.viewports[id].pos.x) / room.viewports[id].size.x;
-}
-alias window_view_mouse_get_x = windowViewMouseGetX;
-
-double windowViewMouseGetY(uint id) nothrow @nogc @trusted{
-	int y;
-	SDL_GetMouseState(null, &y);
-	return (y - room.viewports[id].pos.y) / room.viewports[id].size.y;
-}
-alias window_view_mouse_get_y = windowViewMouseGetY;
-
-double windowViewsMouseGetX() nothrow @nogc @safe => mouseX;
-alias window_views_mouse_get_x = windowViewsMouseGetX;
-
-double windowViewsMouseGetY() nothrow @nogc @safe => mouseY;
-alias window_views_mouse_get_y = windowViewsMouseGetY;

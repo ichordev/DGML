@@ -8,14 +8,73 @@ De-GML is here to help (former) GameMaker users wishing to port their games into
 |`de-gml:sdl` | For windowing and input. Depends on `bindbc-sdl`. |
 |`de-gml:bgfx`| For drawing. Depends on `bindbc-bgfx`, `shelper`, `de-gml:sdl`. |
 
-The library mainly focuses on 2D GameMaker games without custom rendering setups. If you've done custom/3D rendering in GameMaker, you're probably up to doing the rendering yourself by using [bgfx](https://github.com/bkaradzic/bgfx/)'s [D bindings](https://github.com/BindBC/bindbc-bgfx).
+The library mainly focuses on helping convert GameMaker games without custom rendering setups. If you're familiar with custom rendering in GameMaker, you might be able to write your own rendering code using [bgfx](https://github.com/bkaradzic/bgfx/)'s [D bindings](https://github.com/BindBC/bindbc-bgfx).
 
-DeGML's API uses GameMaker function names converted to D-style camelCase, but has aliases for the exact function names.
-Any enumerated constants (e.g. `pt_linestrip`) will be converted to D enums with the appropriate casing (e.g. `PT.lineStrip) with GML-like aliases (e.g. `pt.linestrip`)
+Check the examples to see how to get started. Documentation for parts of the API that are from GML is sparse. Up-to-date documentation for GameMaker is located [here](https://manual.gamemaker.io).
 
-Documentation is sparse because this library is for converting existing code. Up-to-date documentation for GameMaker is located [here](https://manual.gamemaker.io).
+GML features that can easily be converted to using D features or Phobos functions are not necessarily included in De-GML. Some simple conversions are listed in the [Conversion Cheatsheet](#conversion-cheatsheet) below.
 
-GML features that can easily be converted to using D features or Phobos functions are not necessarily included in DeGML. Some simple conversions are listed in the [Conversion Cheatsheet](#conversion-cheatsheet) below.
+| Table of Contents |
+|-------------------|
+|[API Differences](#api-differences)|
+|[Conversion Cheatsheet](#conversion-cheatsheet)|
+
+## API Differences
+
+### General Rules
+Function names and parameters are converted to [D Style](https://dlang.org/dstyle.html#naming_conventions) camelCase, but there are aliases to the GML-style snake_cased function names for convenience.
+
+GML is a dynamically typed language, where D is statically typed. De-GML's API reflects this difference in various areas, including but not limited to:
+- Conversion from floating point types to integer types is delegated to the caller (i.e. you) rather than performed implicitly by functions.
+- Functions that would conditionally return `undefined` or return one of many types types may instead use [`Variant`][VariantDocs] (e.g. all DS functions do this), or they may use some other workaround.
+
+Any enumerated constants (e.g. `pt_linestrip`, `bm_inv_src_colour`) are converted to D enums with the [appropriate casing](https://dlang.org/dstyle.html#naming_enum_members) (e.g. `PT.lineStrip`, `BM.invSrcColour`) with GML-style aliases for convenience (e.g. `pt.linestrip`, `bm.inv_src_colour`)
+
+### Data Structures
+
+[VariantDocs]: https://dlang.org/phobos/std_variant.html#.Variant "Documentation for Variants"
+
+Data structure accessors have the symbol prefix removed. For example:
+```d
+auto a = myList[27];      //in GML: myList[| 27]
+auto b = myMap["hello!"]; //in GML: myMap[? "hello"]
+auto c = myGrid[12, 34];  //in GML: myGrid[# 12, 34]
+```
+
+Data structures use [`Variant`][VariantDocs] so that they can store arbitrary types. Whenever you retrieve a value from a data structure, it will be of type [`Variant`][VariantDocs]. You can get the original value back in a few ways:
+
+- [`.peek(Type)()`](https://dlang.org/phobos/std_variant.html#.VariantN.peek): Returns a pointer to the value, or `null` if the [`Variant`][VariantDocs] doesn't contain a value of that type. Example:
+```d
+int* x = myList[0].peek!int();
+if(x !is null){ //make sure `list[0]` was storing an `int`
+	return *x; //de-reference the pointer if it's valid
+}
+```
+- [`.get(Type)()`](https://dlang.org/phobos/std_variant.html#.VariantN.get): Tries to implicitly convert the value to the requested type. Throws an exception if the type in the [`Variant`][VariantDocs] can't be implicitly converted. Example:
+```d
+try{
+	int x = myList[0].get!int();
+}catch(VariantException ex){
+	//this will run if the value couldn't be implicitly converted to an `int`
+	//for example, if the value was a `string`, `double`, or `long`
+}
+```
+- [`.coerce(Type)()`](https://dlang.org/phobos/std_variant.html#.VariantN.coerce): Tries to explicitly convert (i.e. cast) the value to the requested type. Throws an exception if the type in the [`Variant`][VariantDocs] can't be explicitly converted. Example:
+```d
+try{
+	int x = myList[0].coerce!int();
+}catch(VariantException ex){
+	//this will run if the value couldn't be explicitly converted to an `int`
+	//for example, if the value was a `string`
+}
+```
+- [`visit(Handlers...)()`](https://dlang.org/phobos/std_variant.html#.visit)
+- [`tryVisit(Handlers...)()`](https://dlang.org/phobos/std_variant.html#.tryVisit)
+
+### Rooms
+Room Assets are pointers in De-GML, so instead of checking if they are `== -1`, you should check if they are `is null`.
+
+
 
 ## Conversion Cheatsheet
 

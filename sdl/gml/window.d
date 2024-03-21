@@ -1,6 +1,6 @@
 module gml.window;
 
-import gml.input, gml.options, gml.room;
+import gml.camera, gml.collision, gml.input, gml.options, gml.room;
 
 import std.exception, std.string;
 import ic.vec;
@@ -9,7 +9,7 @@ import bindbc.sdl;
 void init(){
 	enforce(SDL_InitSubSystem(SDL_INIT_VIDEO) == 0, "SDL failed to initialise video: %s".format(SDL_GetError().fromStringz()));
 	
-	windowSize = room.windowSize;
+	windowSize = roomData.windowSize;
 	prevWindowSize = windowSize;
 	window = SDL_CreateWindow(
 		options.displayName.toStringz(),
@@ -87,6 +87,12 @@ bool processEvents(){
 						keyboardKey = -1;
 					}
 				}
+				break;
+			case SDL_MOUSEMOTION:
+				absMousePos.x = event.motion.x;
+				absMousePos.y = event.motion.y;
+				relMousePos.x += event.motion.xrel;
+				relMousePos.y += event.motion.yrel;
 				break;
 			case SDL_MOUSEBUTTONDOWN:
 				gml.input.mouse.setPressed(event.button.button);

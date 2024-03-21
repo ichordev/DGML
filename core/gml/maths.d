@@ -34,11 +34,9 @@ TimeZone dateGetTimeZone() nothrow @nogc @safe =>
 	timeZone;
 alias date_get_timezone = dateGetTimeZone;
 
-///This function is unique to De-GML.
 auto getTimeZone() nothrow @safe =>
 	timeZone == TimeZone.utc ? UTC() : LocalTime();
 
-///This function is unique to De-GML.
 DateTime getDateTime() nothrow @safe =>
 	cast(DateTime)Clock.currTime(getTimeZone());
 

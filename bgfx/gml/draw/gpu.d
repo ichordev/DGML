@@ -1,6 +1,7 @@
 module gml.draw.gpu;
 
 import gml.draw;
+
 import bindbc.bgfx;
 
 void init(){
@@ -35,6 +36,35 @@ enum Cull{
 	counterclockwise = counterClockwise,
 }
 alias cull = Cull;
+
+enum BM: bgfx.StateBlend_{
+	zero            = StateBlend.zero,          ///(0, 0, 0, 0)
+	one             = StateBlend.one,           ///(1, 1, 1, 1)
+	srcColour       = StateBlend.srcColour,     ///(Rs, Gs, Bs, As)
+	src_colour      = srcColour,
+	invSrcColour    = StateBlend.invSrcColour,  ///(1-Rs, 1-Gs, 1-Bs, 1-As)
+	inv_src_colour  = invSrcColour,
+	srcAlpha        = StateBlend.srcAlpha,      ///(As, As, As, As)
+	src_alpha       = srcAlpha,
+	invSrcAlpha     = StateBlend.invSrcAlpha,   ///(1-As, 1-As, 1-As, 1-As)
+	inv_src_alpha   = invSrcAlpha,
+	destAlpha       = StateBlend.dstAlpha,      ///(Ad, Ad, Ad, Ad)
+	dest_alpha      = destAlpha,
+	invDestAlpha    = StateBlend.invDstAlpha,   ///(1-Ad, 1-Ad, 1-Ad, 1-Ad)
+	inv_dest_alpha  = invDestAlpha,
+	destColour      = StateBlend.dstColour,     ///(Rd, Gd, Bd, Ad)
+	dest_colour     = destColour,
+	invDestColour   = StateBlend.invDstColor,   ///(1-Rd, 1-Gd, 1-Bd, 1-Ad)
+	inv_dest_colour = invDestColour,
+	srcAlphaSat     = StateBlend.srcAlphaSat,   ///(f, f, f, 1) where f = min(As, 1-Ad)
+	src_alpha_sat   = srcAlphaSat,
+	
+	normal    = blendFunc(StateBlend.srcAlpha, StateBlend.invSrcAlpha),   ///Normal blending (the default blend mode).
+	add       = blendFunc(StateBlend.srcAlpha, StateBlend.one),           ///Additive blending. Luminosity values of light areas are added.
+	subtract  = blendFunc(StateBlend.zero,     StateBlend.invSrcColour),  ///Subtractive blending. Luminosity values of light areas are subtracted.
+	max       = blendFunc(StateBlend.srcAlpha, StateBlend.invSrcColour),  ///Max blending. Similar to additive blending.
+}
+alias bm = BM;
 
 //Getters
 
@@ -79,13 +109,33 @@ Cull gpuGetCullMode() nothrow @nogc @safe{
 }
 alias gpu_get_cullmode = gpuGetCullMode;
 
-//TODO: gpu_get_blendmode. What happens if using an extended blend mode?
-//TODO: gpu_get_blendmode_ext
-//TODO: gpu_get_blendmode_ext_sepalpha
-//TODO: gpu_get_blendmode_src
-//TODO: gpu_get_blendmode_dest
-//TODO: gpu_get_blendmode_srcalpha
-//TODO: gpu_get_blendmode_destalpha
+BM gpuGetBlendMode() nothrow @nogc @safe =>
+	cast(BM)gpuState.blendMode;
+alias gpu_get_blendmode = gpuGetBlendMode;
+
+BM[2] gpuGetBlendModeExt() nothrow @nogc @safe =>
+	[gpuGetBlendModeSrc(), gpuGetBlendModeDest()];
+alias gpu_get_blendmode_ext = gpuGetBlendModeExt;
+
+BM[4] gpuGetBlendModeExtSepAlpha() nothrow @nogc @safe =>
+	[gpuGetBlendModeSrc(), gpuGetBlendModeDest(), gpuGetBlendModeSrcAlpha(), gpuGetBlendModeDestAlpha()];
+alias gpu_get_blendmode_ext_sepalpha = gpuGetBlendModeExtSepAlpha;
+
+BM gpuGetBlendModeSrc() nothrow @nogc @safe =>
+	cast(BM)(gpuState.blendMode & StateBlend.mask);
+alias gpu_get_blendmode_src = gpuGetBlendModeSrc;
+
+BM gpuGetBlendModeDest() nothrow @nogc @safe =>
+	cast(BM)((gpuState.blendMode >> 4) & StateBlend.mask);
+alias gpu_get_blendmode_dest = gpuGetBlendModeDest;
+
+BM gpuGetBlendModeSrcAlpha() nothrow @nogc @safe =>
+	cast(BM)((gpuState.blendMode >> 8) & StateBlend.mask);
+alias gpu_get_blendmode_srcalpha = gpuGetBlendModeSrcAlpha;
+
+BM gpuGetBlendModeDestAlpha() nothrow @nogc @safe =>
+	cast(BM)((gpuState.blendMode >> 12) & StateBlend.mask);
+alias gpu_get_blendmode_destalpha = gpuGetBlendModeDestAlpha;
 
 bool[4] gpuGetColourWriteEnable() nothrow @nogc @safe => [
 	(gpuState.write & StateWrite.r) != 0,
@@ -95,14 +145,18 @@ bool[4] gpuGetColourWriteEnable() nothrow @nogc @safe => [
 ];
 alias gpu_get_colourwriteenable = gpuGetColourWriteEnable;
 
+bool gpuGetAlphaTestEnable() nothrow @nogc @safe =>
+	gpuState.alphaTest;
+alias gpu_get_alphatestenable = gpuGetAlphaTestEnable;
+
+ubyte gpuGetAlphaTestRef() nothrow @nogc @safe =>
+	cast(ubyte)(gpuState.alphaRef >> StateAlphaRef.shift);
+alias gpu_get_alphatestref = gpuGetAlphaTestRef;
+
 //TODO: gpu_get_texfilter
 //TODO: gpu_get_texfilter_ext
 //TODO: gpu_get_texrepeat
 //TODO: gpu_get_texrepeat_ext
-
-bool gpuGetAlphaTestEnable() nothrow @nogc @safe =>
-	gpuState.alphaTest;
-alias gpu_get_alphatestenable = gpuGetAlphaTestEnable;
 
 //Setters
 
@@ -156,12 +210,45 @@ void gpuSetCullMode(Cull cullMode) nothrow @nogc @safe{
 }
 alias gpu_set_cullmode = gpuSetCullMode;
 
-//TODO: gpu_set_blendmode
-//TODO: gpu_set_blendmode_ext
-//TODO: gpu_set_blendmode_ext_sepalpha
-//TODO: gpu_set_colourwriteenable
-//TODO: gpu_set_alphatestenable
-//TODO: gpu_set_alphatestref
+void gpuSetBlendMode(BM mode) nothrow @nogc @safe{
+	gpuState.blendMode = mode;
+}
+alias gpu_set_blendmode = gpuSetBlendMode;
+
+void gpuSetBlendModeExt(BM src, BM dest) nothrow @nogc @safe{
+	gpuState.blendMode = blendFunc(src, dest);
+}
+alias gpu_set_blendmode_ext = gpuSetBlendModeExt;
+
+void gpuSetBlendModeExtSepAlpha(BM src, BM dest, BM alphaSrc, BM alphaDest) nothrow @nogc @safe{
+	gpuState.blendMode = blendFuncSeparate(src, dest, alphaSrc, alphaDest);
+}
+alias gpu_set_blendmode_ext_sepalpha = gpuSetBlendModeExtSepAlpha;
+
+void gpuSetColourWriteEnable(bool red, bool green, bool blue, bool alpha) nothrow @nogc @safe{
+	gpuState.write &= ~(StateWrite.rgb | StateWrite.a);
+	gpuState.write |= (
+		(red   ? StateWrite.r : 0) |
+		(green ? StateWrite.g : 0) |
+		(blue  ? StateWrite.b : 0) |
+		(alpha ? StateWrite.a : 0)
+	);
+}
+void gpuSetColourWriteEnable(bool[4] array) nothrow @nogc @safe{
+	gpuSetColourWriteEnable(array[0], array[1], array[2], array[3]);
+}
+alias gpu_set_colourwriteenable = gpuSetColourWriteEnable;
+
+void gpuSetAlphaTestEnable(bool enable) nothrow @nogc @safe{
+	gpuState.alphaTest = enable;
+}
+alias gpu_set_alphatestenable = gpuSetAlphaTestEnable;
+
+void gpuSetAlphaTestRef(ubyte val) nothrow @nogc @safe{
+	gpuState.alphaRef = (() @trusted => toStateAlphaRef(val))();
+}
+alias gpu_set_alphatestref = gpuSetAlphaTestRef;
+
 //TODO: gpu_set_texfilter
 //TODO: gpu_set_texfilter_ext
 //TODO: gpu_set_texrepeat

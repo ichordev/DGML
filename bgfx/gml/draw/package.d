@@ -6,7 +6,7 @@ public import
 	gml.draw.gpu,
 	gml.draw.texture;
 
-import gml.camera, gml.display, gml.game, gml.options, gml.room, gml.window;
+import gml.camera, gml.collision, gml.display, gml.game, gml.input.mouse, gml.options, gml.room, gml.window;
 
 import core.time, core.thread;
 import std.algorithm.comparison, std.exception, std.format, std.math, std.string;
@@ -108,21 +108,6 @@ bgfx.UniformHandle u_colour;
 
 MonoTime prevFrameTime;
 
-Vec2!ushort masterViewportPos1;
-Vec2!ushort masterViewportPos2;
-Vec2!double masterViewportScale;
-
-void scaleToMasterViewport(ref Vec2!ushort pos, ref Vec2!ushort size) nothrow @nogc @safe{
-	pos = masterViewportPos1 + Vec2!ushort(
-		cast(ushort)round(pos.x * masterViewportScale.x),
-		cast(ushort)round(pos.y * masterViewportScale.y),
-	);
-	size = Vec2!ushort(
-		cast(ushort)round(size.x * masterViewportScale.x),
-		cast(ushort)round(size.y * masterViewportScale.y),
-	);
-}
-
 void startFrame(){
 	if(prevFrameTime == MonoTime.zero()){
 		prevFrameTime = MonoTime.currTime;
@@ -131,7 +116,7 @@ void startFrame(){
 	if(windowSize != prevWindowSize){
 		bgfx.reset(windowSize.x, windowSize.y, bgfxResetFlags);
 		
-		const roomWindowSize = room.windowSize;
+		const roomWindowSize = roomData.windowSize;
 		if(options.keepAspectRatio){
 			const ratio = roomWindowSize.x / cast(double)roomWindowSize.y;
 			const masterViewportSize = {
@@ -162,8 +147,8 @@ void startFrame(){
 		}
 	}
 	
-	if(room.useViews){
-		foreach(viewport; room.viewports){
+	if(roomData.useViews){
+		foreach(viewport; roomData.viewports){
 			if(viewport.visible){
 				if(viewport.camera){
 					viewport.camera.update();
@@ -185,7 +170,7 @@ void startFrame(){
 bool nextView(){
 	viewCurrent = viewNext;
 	
-	if(room.useViews){
+	if(roomData.useViews){
 		if(viewCurrent > 0){
 			if(viewportCam){
 				viewportCam.end();
@@ -195,7 +180,7 @@ bool nextView(){
 		//find first visible viewport
 		Viewport port;
 		while(viewCurrent < 8){
-			port = room.viewports[viewCurrent];
+			port = roomData.viewports[viewCurrent];
 			if(port.visible){
 				break;
 			}
@@ -209,7 +194,7 @@ bool nextView(){
 	}else{
 		if(viewCurrent >= 1) return false;
 		
-		const roomWindowSize = room.windowSize;
+		const roomWindowSize = roomData.windowSize;
 		viewportPos = Vec2!ushort(0, 0);
 		viewportSize = Vec2!ushort(roomWindowSize.x, roomWindowSize.y);
 		
@@ -222,8 +207,8 @@ bool nextView(){
 		viewMat = viewportCam.view;
 		projMat = viewportCam.proj;
 	}else{
-		viewMat = Mat4.init;
-		projMat = Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(room.size.x, room.size.y), -16000f, 16000f, bgfx.getCaps().homogeneousDepth);
+		viewMat = Camera.getDefaultView();
+		projMat = Camera.getDefaultProj(bgfx.getCaps().homogeneousDepth);
 	}
 	scaleToMasterViewport(viewportPos, viewportSize);
 	
@@ -265,19 +250,19 @@ struct GPUState{
 	bool zTest = false;
 	bool alphaTest = false;
 	
-	ulong getBgfxState() nothrow @nogc pure @safe =>
-		write | blending | culling
+	auto getBgfxState() nothrow @nogc pure @safe =>
+		write | blendMode | culling
 		| (zTest ? zFunc : 0)
 		| (alphaTest ? alphaRef : 0);
 	
-	ulong write = StateWrite.rgb | StateWrite.a | StateWrite.z;
+	bgfx.StateWrite_ write = StateWrite.rgb | StateWrite.a | StateWrite.z;
 	
-	ulong blending = StateBlendFunc.alpha;
+	bgfx.StateBlend_ blendMode = BM.normal;
 	
-	ulong culling = 0;
+	bgfx.StateCull_ culling = 0;
 	
-	ulong zFunc = StateDepthTest.lEqual;
-	ulong alphaRef = (() @trusted => toStateAlphaRef(0))();
+	bgfx.StateDepthTest_ zFunc = StateDepthTest.lEqual;
+	bgfx.StateAlphaRef_ alphaRef = (() @trusted => toStateAlphaRef(0))();
 	
 	bgfx.ViewID bgfxViewNext = 0;
 	bgfx.ViewID bgfxView = 0;
@@ -308,7 +293,7 @@ struct VertPos{
 	float x,y;
 	
 	static bgfx.VertexLayout layout;
-	static void init(){
+	static void init() nothrow @nogc{
 		layout.begin()
 			.add(Attrib.position,  2, AttribType.float_)
 		.end();
@@ -319,7 +304,7 @@ struct VertPosCol{
 	uint col;
 	
 	static bgfx.VertexLayout layout;
-	static void init(){
+	static void init() nothrow @nogc{
 		layout.begin()
 			.add(Attrib.position,  2, AttribType.float_)
 			.add(Attrib.colour0,   4, AttribType.uint8, true)
@@ -332,7 +317,7 @@ struct VertPosColTex{
 	float u,v;
 	
 	static bgfx.VertexLayout layout;
-	static void init(){
+	static void init() nothrow @nogc{
 		layout.begin()
 			.add(Attrib.position,  2, AttribType.float_)
 			.add(Attrib.colour0,   4, AttribType.uint8, true)
@@ -355,6 +340,100 @@ alias matrix_build_projection_perspective = matrixBuildProjectionPerspective;
 Mat4 matrixBuildProjectionPerspectiveFov(float fov, float aspect, float zNear, float zFar) nothrow @nogc =>
 	Mat4.projPersp(fov, aspect, zNear, zFar, bgfx.getCaps().homogeneousDepth);
 alias matrix_build_projection_perspective_fov = matrixBuildProjectionPerspectiveFov;
+
+Vec2!int reverseEngineerMousePos(Viewport port, Vec2!ushort portPos, Vec2!ushort portSize) nothrow @nogc @safe{
+	Mat4 view, proj;
+	
+	bool homoNDC = (() @trusted => bgfx.getCaps().homogeneousDepth)();
+	if(port.camera){
+		view = port.camera.view;
+		proj = port.camera.proj;
+	}else{
+		view = Camera.getDefaultView();
+		proj = Camera.getDefaultProj(homoNDC);
+	}
+	
+	Vec2!double pos;
+	if(homoNDC){
+		pos = cast(Vec2!double)(absMousePos - cast(Vec2!int)(portPos)) / cast(Vec2!double)portSize;
+	}else{
+		pos = cast(Vec2!double)(absMousePos - cast(Vec2!int)(portPos + (portSize / 2))) / cast(Vec2!double)(portSize / 2);
+	}
+	pos.y = -pos.y;
+	pos = (proj * view).invert() * pos;
+	
+	import std;debug writeln(pos);
+	return cast(Vec2!int)pos;
+}
+
+Vec2!int getViewsMousePos() nothrow @nogc @safe{
+	if(roomData.useViews){
+		Vec2!ushort portPos, portSize;
+		
+		foreach(port; roomData.viewports){
+			portPos = port.pos;
+			portSize = port.size;
+			scaleToMasterViewport(portPos, portSize);
+			
+			if(port.visible && pointInRectangle(absMousePos.x, absMousePos.y, portPos.x, portPos.y, portPos.x+portSize.x, portPos.y+portSize.y)){
+				return reverseEngineerMousePos(port, portPos, portSize);
+			}
+		}
+		foreach(port; roomData.viewports){
+			if(port.visible){
+				portPos = port.pos;
+				portSize = port.size;
+				scaleToMasterViewport(portPos, portSize);
+				return reverseEngineerMousePos(port, portPos, portSize);
+			}
+		}
+	}
+	return absMousePos;
+}
+
+@property int mouseX() nothrow @nogc @safe{
+	if(mouseViewPosDirty){
+		mouseViewPos = getViewsMousePos();
+	}
+	return mouseViewPos.x;
+}
+alias mouse_x = mouseX;
+
+@property int mouseY() nothrow @nogc @safe{
+	if(mouseViewPosDirty){
+		mouseViewPos = getViewsMousePos();
+	}
+	return mouseViewPos.y;
+}
+alias mouse_y = mouseY;
+
+int windowViewMouseGetX(uint id) nothrow @nogc @safe{
+	if(mouseViewsPosDirty[id]){
+		auto portPos  = roomData.viewports[id].pos;
+		auto portSize = roomData.viewports[id].size;
+		scaleToMasterViewport(portPos, portSize);
+		mouseViewsPos[id] = reverseEngineerMousePos(roomData.viewports[id], portPos, portSize);
+	}
+	return mouseViewsPos[id].x;
+}
+alias window_view_mouse_get_x = windowViewMouseGetX;
+
+int windowViewMouseGetY(uint id) nothrow @nogc @safe{
+	if(mouseViewsPosDirty[id]){
+		auto portPos  = roomData.viewports[id].pos;
+		auto portSize = roomData.viewports[id].size;
+		scaleToMasterViewport(portPos, portSize);
+		mouseViewsPos[id] = reverseEngineerMousePos(roomData.viewports[id], portPos, portSize);
+	}
+	return mouseViewsPos[id].y;
+}
+alias window_view_mouse_get_y = windowViewMouseGetY;
+
+alias windowViewsMouseGetX = mouseX;
+alias window_views_mouse_get_x = windowViewsMouseGetX;
+
+alias windowViewsMouseGetY = mouseY;
+alias window_views_mouse_get_y = windowViewsMouseGetY;
 
 void cameraApply(Camera cameraID) nothrow @nogc{
 	viewportCam = cameraID;

@@ -10,7 +10,8 @@ void init(){
 }
 
 void quit(){
-	
+	self = null;
+	other = null;
 }
 
 class GMObject{
@@ -138,6 +139,9 @@ class GMObject{
 	
 	void onDestroy(){}
 }
+
+GMObject self;
+GMObject other;
 
 Obj instanceCreateLayer(Obj)(float x, float y, LayerID layerID) nothrow pure @safe{
 	auto obj = new Obj();

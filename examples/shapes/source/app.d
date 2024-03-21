@@ -17,7 +17,8 @@ void main(){
 	cameraSetProjMat(myCam2, matrixBuildProjectionOrtho(50, 50, 700, 500, -16000f, 16000f));
 	
 	gml.room.orderedRooms ~= Room(
-		Vec2!uint(800, 600),
+		ordered: true,
+		size: Vec2!uint(800, 600),
 		useViews: true,
 		viewports: [
 			Viewport(
@@ -48,15 +49,16 @@ void main(){
 	
 	float s = 0f;
 	while(processEvents()){
+		s += 0.04f;
+		s %= pi*2f;
+		float x = sin(s)*0.5f + 0.5f;
+		float y = abs(cos(s));
+		
 		startFrame();
 		while(nextView()){
-			s += 0.02f;
-			s %= pi*2f;
-			float x = sin(s)*0.5f + 0.5f;
-			float y = abs(cos(s));
-			
 			drawClear(C.grey);
 			drawSetColour(0xFF_FF_FF);
+			drawCircle(mouseX, mouseY, 5, false);
 			drawRectangle(10, 100, lerp(100, 350, x), lerp(200, 400, x), false);
 			drawSetColour(0xFF);
 			drawRectangle(lerp(200, 400, x), lerp(150, 300, x), 700, 750, false);

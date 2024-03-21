@@ -13,12 +13,24 @@ void quit(){
 	
 }
 
-uint viewCurrent;
-uint viewNext;
-
 Vec2!ushort viewportPos;
 Vec2!ushort viewportSize;
 Camera viewportCam;
+
+Vec2!ushort masterViewportPos1;
+Vec2!ushort masterViewportPos2;
+Vec2!double masterViewportScale;
+
+void scaleToMasterViewport(ref Vec2!ushort pos, ref Vec2!ushort size) nothrow @nogc @safe{
+	pos = masterViewportPos1 + Vec2!ushort(
+		cast(ushort)round(pos.x * masterViewportScale.x),
+		cast(ushort)round(pos.y * masterViewportScale.y),
+	);
+	size = Vec2!ushort(
+		cast(ushort)round(size.x * masterViewportScale.x),
+		cast(ushort)round(size.y * masterViewportScale.y),
+	);
+}
 
 Mat4 viewMat;
 Mat4 projMat;
@@ -27,6 +39,11 @@ Mat4 worldMat;
 class Camera{
 	Mat4 view;
 	Mat4 proj;
+	
+	static Mat4 getDefaultView() nothrow @nogc pure @safe =>
+		Mat4.init;
+	static Mat4 getDefaultProj(bool homoNDC) nothrow @nogc @safe =>
+		Mat4.projOrtho(Vec2!float(0f, 0f), Vec2!float(roomData.size.x, roomData.size.y), -16000f, 16000f, homoNDC);
 	
 	void delegate() updateFn;
 	void delegate() beginFn;
@@ -160,3 +177,9 @@ alias camera_get_end_script = cameraGetEndScript;
 Camera cameraGetActive() nothrow @nogc @safe =>
 	viewportCam;
 alias camera_get_active = cameraGetActive;
+
+uint viewCurrent;
+alias view_current = viewCurrent;
+uint viewNext;
+
+
