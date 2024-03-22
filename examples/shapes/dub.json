@@ -9,7 +9,7 @@
 		"bindbc-bgfx": ">=1.0.0",
 		"shelper": "~>1.0.0",
 		"ichor": "~>0.1.0",
-		"de-gml": "~>0.1.0",
+		"de-gml": {"path": "../../"},
 	},
 	"subConfigurations": {
 		"bindbc-sdl": "static",
