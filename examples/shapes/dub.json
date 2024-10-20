@@ -40,6 +40,7 @@
 	"preBuildCommands-windows": ["bash ../compileShaders.sh windows s_3_0"],
 	
 	"targetType": "executable",
+	"targetPath": "bin",
 	
 	"configurations": {
 		"bgfxDebug": {
